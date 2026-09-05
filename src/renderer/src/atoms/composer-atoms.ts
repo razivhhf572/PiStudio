@@ -39,6 +39,19 @@ export const sessionAttachmentsByIdAtom = atom<Record<string, ImageContent[]>>({
 export const sessionPasteFilesByIdAtom = atom<Record<string, PastedTextFile[]>>({});
 export const sessionQuotesByIdAtom = atom<Record<string, SessionQuoteMap>>({});
 
+/**
+ * 引导页（无 record 虚拟会话）用户「本次」主动选择的模型/思考档位。
+ * 选择器/底栏即时读取这两个 atom 反映选择（不依赖 localStorage 重渲染）；
+ * 创建会话时 App 直接把选择作为 model/thinkingLevel 指名传入（优先于一切默认解析）。
+ * 与 localStorage 偏好的区别：偏好只是回退来源（显式默认 > 偏好），
+ * 而本次主动选择 = 用户明确意图，必须立即生效——修复「配置了显式默认模型后
+ * 引导页换模型 UI 不动、创建会话被默认覆盖」的回归（c12bcdd4）。
+ */
+export const welcomeModelSelectionAtom = atom<
+  { provider: string; modelId: string } | undefined
+>(undefined);
+export const welcomeThinkingSelectionAtom = atom<string | undefined>(undefined);
+
 export const sessionComposerModeByIdAtom = atom<Record<string, SessionComposerMode>>({});
 export const sessionSendStateByIdAtom = atom<Record<string, SessionSendState>>({});
 

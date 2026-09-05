@@ -82,6 +82,11 @@ import type {
 	SessionRecord,
 	UsageProbeBackend,
 } from "../../../../shared/types";
+import { useAtomValue } from "jotai";
+import {
+	welcomeModelSelectionAtom,
+	welcomeThinkingSelectionAtom,
+} from "../../atoms/composer-atoms";
 
 
 /** 单个 extension widget 卡片：可折叠标题栏 + 内容行，支持手动关闭 */
@@ -405,13 +410,15 @@ export function ComposerBottomBar(props: {
 		}
 	}, [welcomeModelLost]);
 	const effectiveWelcomeModel = welcomeModelLost ? undefined : welcomeModel;
-	// 引导页（无 record、pi）默认模型决策，与主进程创建规则（launchDefaults）同源，
-	// 避免「底栏显示的默认」与「首次发送套用的默认」分叉：
-	// - 用户显式配置了默认模型（defaultModelConfigured）→ 一律用主进程解析的默认，
-	//   欢迎页偏好被覆盖（用户规则：默认模型 > 偏好 > 上次使用 > 空）；
-	// - 未配置显式默认 → 有效偏好优先，其次解析结果（此时 = 上次使用 / 空）。
+	// 引导页「本次」主动选择的模型/思考档位（与 ComposerPickerHost 同源）：
+	// 选择后立即反映到底栏，不被显式默认模型规则压过（c12bcdd4 回归修复）。
+	const welcomeSelection = useAtomValue(welcomeModelSelectionAtom);
+	const welcomeThinkingSelection = useAtomValue(welcomeThinkingSelectionAtom);
 	const guideDefaultModel =
-		props.defaultModelConfigured || isDsh ? props.defaultModel : (effectiveWelcomeModel ?? props.defaultModel);
+		welcomeSelection ??
+		(props.defaultModelConfigured || isDsh
+			? props.defaultModel
+			: (effectiveWelcomeModel ?? props.defaultModel));
 	const runtimeLive = Boolean(props.runtimeLive);
 	// 用量查询链路随会话后端：DSH 会话走 dsh（$DSH_HOME 配置 + 凭据库），其余走 pi。
 	// 圆球面板必须与 DSH 卡片/选择器同一 backend，否则查的是另一条 usage-probes.json。
@@ -421,9 +428,9 @@ export function ComposerBottomBar(props: {
 	const currentThinkingLevel = resolveComposerThinkingLevel({
 		state: props.state?.thinkingLevel,
 		record: props.record?.thinkingLevel,
-		// 思考级别一律走默认档位（用户规则：取 settings.defaultThinkingLevel；
-		// 欢迎页偏好级别不再参与——偏好只管模型，级别跟默认走）。
-		fallback: props.defaultThinkingLevel,
+		// 引导页（无 record）：本次现场选择 > 默认档位（settings.defaultThinkingLevel）；
+		// 欢迎页旧偏好（localStorage）不参与——只认「本次主动选择」与「默认」。
+		fallback: welcomeThinkingSelection ?? props.defaultThinkingLevel,
 		isLive: runtimeLive,
 	});
 	const thinkingLevelLabel = (level: string) => {

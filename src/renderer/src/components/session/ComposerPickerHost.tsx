@@ -1,4 +1,4 @@
-import { useAtomValue, useSetAtom, useStore } from "jotai";
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import type { AvailableModel, SessionRuntimeTarget } from "../../../../shared/types";
 import {
@@ -12,6 +12,8 @@ import {
   sessionRuntimeByIdAtom,
   sessionRuntimeBySessionIdAtomFamily,
   upsertSessionAtom,
+  welcomeModelSelectionAtom,
+  welcomeThinkingSelectionAtom,
 } from "../../atoms";
 import type { PromptTemplateInfo } from "../../composerBehavior";
 import {
@@ -69,6 +71,12 @@ export function ComposerPickerHost(props: ComposerPickerHostProps) {
   const upsertSession = useSetAtom(upsertSessionAtom);
   const modelPending = useAtomValue(modelPendingByIdAtom)[sessionId];
   const setModelPendingMap = useSetAtom(modelPendingByIdAtom);
+  // 引导页「本次」主动选择的模型/思考档位：选择后立即反映到底栏与选择器高亮，
+  // 不依赖 localStorage 重渲染；创建会话时由 App 直接指名（优先于一切默认解析）。
+  const [welcomeSelection, setWelcomeSelection] = useAtom(welcomeModelSelectionAtom);
+  const [welcomeThinkingSelection, setWelcomeThinkingSelection] = useAtom(
+    welcomeThinkingSelectionAtom,
+  );
   const piRuntimeThinkingEntry = useAtomValue(
     piRuntimeThinkingLevelsBySessionIdAtomFamily(sessionId),
   );
@@ -134,11 +142,14 @@ export function ComposerPickerHost(props: ComposerPickerHostProps) {
   }, [welcomeModelLost]);
   const effectiveWelcomeModel = welcomeModelLost ? undefined : welcomeModel;
   // 引导页（无 record）模型高亮 = 底栏同款决策（与主进程创建规则同源）：
-  // 显式配置默认模型时偏好被覆盖；（用户规则：默认模型 > 偏好 > 上次使用 > 空）。
+  // 用户本次主动选择（welcomeSelection）优先于一切；其次才按
+  // 「显式默认 > 偏好 > 上次使用 > 空」取默认（guideDefaultModel 已折叠规则）。
+  // 修复：配置显式默认模型后引导页换模型 UI 不动（c12bcdd4 回归）。
   const guideDefaultModel =
-    props.defaultModelConfigured || isDshSession
+    welcomeSelection ??
+    (props.defaultModelConfigured || isDshSession
       ? props.defaultModel
-      : (effectiveWelcomeModel ?? props.defaultModel);
+      : (effectiveWelcomeModel ?? props.defaultModel));
   // 非 live 残留 state 不能盖住 catalog：Agent 未启动时改模型，选择器高亮必须跟记录走。
   const runtimeLive = isLiveRuntimeStatus(runtime?.status);
   const resolvedLiveModel = resolveComposerLiveModel({
@@ -339,8 +350,10 @@ export function ComposerPickerHost(props: ComposerPickerHostProps) {
   }
 
   async function pickModel(model: AvailableModel) {
-    // 欢迎页/未启动 Agent（无 record）：把选择存本地偏好，点「启动 Agent」创建会话时应用。
+    // 欢迎页/未启动 Agent（无 record）：把选择存本地偏好 + 记录本次现场选择
+    //（atom 即时反映到底栏/选择器），点「启动 Agent」创建会话时直接指名应用。
     if (!record) {
+      setWelcomeSelection({ provider: model.provider, modelId: model.id });
       try {
         localStorage.setItem(WELCOME_MODEL_KEY, JSON.stringify({
           provider: model.provider,
@@ -430,10 +443,10 @@ export function ComposerPickerHost(props: ComposerPickerHostProps) {
   }
 
   async function pickThinking(level: string) {
-    // 欢迎页/未启动 Agent（无 record）：思考级别一律走默认档位（用户规则：
-    // 级别只跟默认级别走，欢迎页偏好级别不参与回退），选择器直接关闭；
-    // 用户变更在真实会话（有 record）里仍即时生效（下方 runtime 链路）。
+    // 欢迎页/未启动 Agent（无 record）：记录本次现场选择（atom 即时反映到底栏/
+    // 选择器），创建会话时由 App 直接指名；不再静默丢弃（修复「选了没反应」）。
     if (!record) {
+      setWelcomeThinkingSelection(level);
       props.onClose();
       return;
     }
@@ -572,15 +585,14 @@ export function ComposerPickerHost(props: ComposerPickerHostProps) {
       cachedPiLevels: currentModel?.thinkingLevels,
       dshReasoningEfforts: currentModel?.reasoningEfforts,
     });
-    // 思考档位一律走默认档位（用户规则：取 settings.defaultThinkingLevel；
-    // 欢迎页偏好级别不再参与），未配置时回退模型自身 defaultEffort。
-    const current = props.defaultThinkingLevel ?? currentModel?.defaultEffort;
+    // 思考档位：本次现场选择 > 默认档位（settings.defaultThinkingLevel）> 模型自身 defaultEffort。
+    const current = welcomeThinkingSelection ?? props.defaultThinkingLevel ?? currentModel?.defaultEffort;
     return (
       <ThinkingPicker
         current={resolveComposerThinkingLevel({
           state: runtime?.state?.thinkingLevel,
           record: record?.thinkingLevel,
-          // 无 record（引导页）：默认档位 > 模型自身 defaultEffort（与底栏同规则）。
+          // 无 record（引导页）：本次选择 > 默认档位 > 模型自身 defaultEffort（与底栏同规则）。
           fallback: current,
           isLive: runtimeLive,
         })}
