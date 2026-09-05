@@ -2,14 +2,14 @@
 
 ## 项目简介
 
-PiDeck 是一个面向本地开发工作的 Electron 桌面应用，用于在多个项目目录之间管理和运行 pi RPC Agent。应用提供多项目工作区、会话时间线、历史会话恢复、文件抽屉、Git 面板、模型选择、工具调用展示、内置浏览器、中文提示词精选、技能/扩展商店以及打包发布能力，目标是让用户可以在桌面端更稳定地管理多个 pi 编码助手会话。
+PiStudio 是一个面向本地开发工作的 Electron 桌面应用，用于在多个项目目录之间管理和运行 pi RPC Agent。应用提供多项目工作区、会话时间线、历史会话恢复、文件抽屉、Git 面板、模型选择、工具调用展示、内置浏览器、中文提示词精选、技能/扩展商店以及打包发布能力，目标是让用户可以在桌面端更稳定地管理多个 pi 编码助手会话。
 
 技术栈：Electron 38 + React 19 + TypeScript + Vite。
 
 **核心边界（不可逾越）：**
 
 - pi 负责 Agent 行为、工具调用、会话读写、模型调用 —— **pi 的事不要替它做**。
-- PiDeck 负责窗口管理、进程生命周期、会话浏览/导入、Git 面板、终端、设置 —— **UI 框架的事 pi 也不要做**。
+- PiStudio 负责窗口管理、进程生命周期、会话浏览/导入、Git 面板、终端、设置 —— **UI 框架的事 pi 也不要做**。
 - 两者通过 stdio JSON-RPC 通信，禁止引入第二条通信通道（如直接 HTTP 到 pi 内部）。
 
 ## 代码结构与跨层契约
@@ -21,7 +21,7 @@ PiDeck 是一个面向本地开发工作的 Electron 桌面应用，用于在多
 - `src/preload/index.ts` 通过 `contextBridge` 暴露最小 `PiDesktopApi`；新增 IPC 必须同步共享通道、main handler、preload 方法三处，订阅 API 必须返回 unsubscribe。
 - `src/renderer/` 只通过 `desktopApi`/preload 调用桌面能力。跨组件状态使用 Jotai atom，副作用放 hook，视图放 component；不得直接 import Node/Electron 或新增第二种全局状态方案。
 - `SessionRecord.id` 是跨重启的稳定会话身份，`agentId` 仅表示当前 pi 子进程。所有 runtime 命令和事件都必须带 `sessionId + agentId + runtimeGeneration`，拒绝旧 runtime 的迟到结果。
-- pi 只通过 stdio JSON-RPC 与 PiDeck 通信；PiDeck 不复刻 pi 的 Agent/工具/会话行为，也不为访问 pi 引入第二条通信通道。
+- pi 只通过 stdio JSON-RPC 与 PiStudio 通信；PiStudio 不复刻 pi 的 Agent/工具/会话行为，也不为访问 pi 引入第二条通信通道。
 - 持久化结构、设置和 session catalog 变更必须兼容旧数据；listener、timer、子进程、terminal 和 watcher 必须在同一模块找到配对清理路径。
 
 
@@ -276,7 +276,7 @@ src/
 
 ### GitHub 协作说明
 
-详见 `docs/PiDeck-协作说明.md`。
+详见 `docs/PiStudio-协作说明.md`。
 
 ## 长期重构纪律
 

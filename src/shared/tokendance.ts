@@ -26,7 +26,7 @@ export const TOKENDANCE_AUTH_URL = "https://tokendance.space/auth";
 export const TOKENDANCE_EXCHANGE_URL = "https://tokendance.space/portal/api/v1/auth/keys";
 
 /** 授权页展示的应用名（key_name 参数，也是新 Key 的默认名称）。 */
-export const TOKENDANCE_KEY_NAME = "PiDeck";
+export const TOKENDANCE_KEY_NAME = "PiStudio";
 
 /** 兜底解析内置端点时发出的归因请求头（请求维度归因，覆盖 Key 上的 app_url）。 */
 export const TOKENDANCE_APP_URL_HEADER = "X-App-URL";

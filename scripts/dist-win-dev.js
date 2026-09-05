@@ -3,7 +3,7 @@
  *
  * 与正式版（phids）完全隔离，互不影响：
  * - productName: phidsDev → 安装目录 %LOCALAPPDATA%\Programs\phidsDev、快捷方式名独立
- * - appId: com.ayuayue.pi-desktop-dev → 通知中心归属（AppUserModelID）独立
+ * - appId: com.ayuayue.pi-studio-dev → 通知中心归属（AppUserModelID）独立
  * - 配置目录: %APPDATA%\pi-desktop-dev → 与 dev 模式共用，复用现有项目/模型/会话配置
  *
  * 注意：dev 与 dev 构建版共享配置目录，同版本单实例锁（instance-locks/0.6.7.lock）互斥，
@@ -24,7 +24,7 @@ execSync("npm run build", {
 
 console.log(`\n[2/3] electron-builder --win nsis …`);
 execSync(
-	`npx electron-builder --win nsis --config.productName=phidsDev --config.appId=com.ayuayue.pi-desktop-dev`,
+	`npx electron-builder --win nsis --config.productName=phidsDev --config.appId=com.ayuayue.pi-studio-dev`,
 	{ cwd: root, stdio: "inherit", shell: true },
 );
 

@@ -721,7 +721,7 @@ export class FeishuBridge {
 		try {
 			// 飞书来源也必须显式注入宿主发送规则；否则 Agent 会回退到 lark-cli 并询问 chat_id。
 			const feishuActionInstruction = [
-				"当前会话已连接飞书聊天。严禁调用 lark-cli、飞书 IM API 或搜索群聊来发送文件；不要询问 chat_id。需要把本地文件发到当前飞书聊天时，最终回答末尾独立一行写 [SEND_FILE:本地文件路径]，PiDeck 会按当前会话绑定自动上传。",
+				"当前会话已连接飞书聊天。严禁调用 lark-cli、飞书 IM API 或搜索群聊来发送文件；不要询问 chat_id。需要把本地文件发到当前飞书聊天时，最终回答末尾独立一行写 [SEND_FILE:本地文件路径]，PiStudio 会按当前会话绑定自动上传。",
 				"只有用户明确要求发送、上传或分享文件时才写 [SEND_FILE:本地文件路径]；如果只是要求保存到本地，不要写该标记。",
 				`当前绑定的飞书 chat_id: ${chatId}。这是只读上下文，用于确认当前会话绑定；发送文件仍必须用 [SEND_FILE:本地文件路径]。`,
 				"这是飞书群聊消息。请直接回复用户。",
@@ -1010,7 +1010,7 @@ export class FeishuBridge {
 			return;
 		}
 		// 带上 PiDeck 标识，方便在飞书中区分消息来源
-		await this.sendSmartMessage(chatId, `💻 **PiDeck**:\n${text}`);
+		await this.sendSmartMessage(chatId, `💻 **PiStudio**:\n${text}`);
 
 		// 检测用户是否要创建飞书文档，记下来等 Agent 回答完后自动创建
 		const docTitle = wantsFeishuDoc(text);

@@ -1,6 +1,6 @@
 # Contributors
 
-Thanks to everyone who has contributed to PiDeck!
+Thanks to everyone who has contributed to PiStudio!
 
 <!-- Ordered by first contribution -->
 

@@ -2,19 +2,19 @@
 layout: home
 
 hero:
-  name: PiDeck
+  name: PiStudio
   text: Desktop Workbench for pi AI Coding Agents
   tagline: Manage local pi coding assistant sessions, configs, Git, and terminal in a unified desktop workspace for Windows, macOS, and Linux.
   actions:
     - theme: brand
       text: Download Latest
-      link: https://github.com/ayuayue/PiDeck/releases
+      link: https://github.com/ayuayue/PiStudio/releases
     - theme: alt
       text: Get Started
       link: /en/guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/ayuayue/PiDeck
+      link: https://github.com/ayuayue/PiStudio
 
 features:
   - title: Multi-Project Workspace
@@ -38,7 +38,7 @@ features:
 ---
 
 <figure class="home-showcase">
-  <img src="/images/overview.png" alt="PiDeck workspace and conversation UI">
+  <img src="/images/overview.png" alt="PiStudio workspace and conversation UI">
   <figcaption>Workspace, sessions, file drawer, Git branches, and tool calls — all in one desktop window.</figcaption>
 </figure>
 
@@ -60,7 +60,7 @@ features:
 
 ## Sponsor
 
-If PiDeck is useful to you, you can buy the author a coffee. Scan the WeChat Pay QR code below to tip. Thank you.
+If PiStudio is useful to you, you can buy the author a coffee. Scan the WeChat Pay QR code below to tip. Thank you.
 
 <p class="sponsor-block">
   <img class="sponsor-qr" src="/images/wechat_pay.png" alt="WeChat Pay tip QR code" />

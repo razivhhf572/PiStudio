@@ -23,7 +23,7 @@ type ExtensionsApi = {
 function getExtensionsApi(): ExtensionsApi {
 	const api = (window as unknown as { piDesktop?: { extensions?: ExtensionsApi } })
 		.piDesktop?.extensions;
-	if (!api) throw new Error("PiDeck extensions API is not available");
+	if (!api) throw new Error("PiStudio extensions API is not available");
 	return api;
 }
 
@@ -52,7 +52,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiDeck",
+		repoUrl: "https://github.com/ayuayue/PiStudio",
 	},
 	{
 		name: "pi-deck-plan-mode",
@@ -62,7 +62,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiDeck",
+		repoUrl: "https://github.com/ayuayue/PiStudio",
 	},
 	{
 		name: "pi-deck-goal-mode",
@@ -72,7 +72,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiDeck",
+		repoUrl: "https://github.com/ayuayue/PiStudio",
 	},
 	{
 		name: "pi-deck-ask-question",
@@ -82,7 +82,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiDeck",
+		repoUrl: "https://github.com/ayuayue/PiStudio",
 	},
 	{
 		name: "pi-deck-nul-redirect-fix",
@@ -92,7 +92,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiDeck",
+		repoUrl: "https://github.com/ayuayue/PiStudio",
 	},
 	{
 		name: "context-mode",

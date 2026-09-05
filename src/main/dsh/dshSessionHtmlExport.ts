@@ -233,7 +233,7 @@ export function renderDshSessionHtml(messages: ChatMessage[], meta: DshSessionEx
     <div class="sub">${subItems.map((item) => `<span>${item}</span>`).join("")}</div>
   </header>
   <main>${messages.map(renderMessage).join("\n")}</main>
-  <footer class="footer">Exported from PiDeck (DeepSeek Harness session)</footer>
+  <footer class="footer">Exported from PiStudio (DeepSeek Harness session)</footer>
 </div>
 </body>
 </html>

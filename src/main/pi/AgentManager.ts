@@ -5665,7 +5665,7 @@ export class AgentManager {
 				title: appName,
 				body,
 				silent: false,
-				// 自定义 toast XML：launch 携带 sessionId，点击后经 pideck:// 协议唤起应用并跳转对应会话
+				// 自定义 toast XML：launch 携带 sessionId，点击后经 pistudio:// 协议唤起应用并跳转对应会话
 				toastXml: this.buildToastXml(appName, body, sessionId),
 			});
 			// 点击通知：聚焦主窗口并切换到对应会话（session-first，跳转按 SessionRecord.id）
@@ -5708,7 +5708,7 @@ export class AgentManager {
 				title: appName,
 				body,
 				silent: false,
-				// 自定义 toast XML：launch 携带 sessionId，点击后经 pideck:// 协议唤起应用并跳转对应会话
+				// 自定义 toast XML：launch 携带 sessionId，点击后经 pistudio:// 协议唤起应用并跳转对应会话
 				toastXml: this.buildToastXml(appName, body, sessionId),
 			});
 			notification.on("click", () => {
@@ -5750,15 +5750,15 @@ export class AgentManager {
 
 	/**
 	 * 生成带会话跳转参数的 Windows toast XML。
-	 * 使用 activationType="protocol" + pideck:// 协议 URL：点击通知时 Windows 通过
+	 * 使用 activationType="protocol" + pistudio:// 协议 URL：点击通知时 Windows 通过
 	 * 注册表协议关联唤起应用（不依赖 ToastActivatorCLSID / 快捷方式匹配，更可靠），
 	 * 被唤起实例的 argv 携带协议 URL，主实例据此识别要跳转的会话。
-	 * sessionId 缺省时 launch 回退为 pideck:// 根地址（点击仅聚焦窗口）。
+	 * sessionId 缺省时 launch 回退为 pistudio:// 根地址（点击仅聚焦窗口）。
 	 */
 	private buildToastXml(title: string, body: string, sessionId?: string): string {
 		const esc = (s: string) =>
 			s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-		const launch = sessionId ? `pideck://session/${sessionId}` : "pideck://";
+		const launch = sessionId ? `pistudio://session/${sessionId}` : "pistudio://";
 		return `<toast activationType="protocol" launch="${launch}">
   <visual>
     <binding template="ToastGeneric">

@@ -1,6 +1,6 @@
 # Settings & Skills
 
-PiDeck provides visual configuration management for all its settings.
+PiStudio provides visual configuration management for all its settings.
 
 ## Opening Settings
 
@@ -31,7 +31,7 @@ Manage authentication credentials:
 
 ## Skills
 
-Skills extend the agent's capabilities. PiDeck supports two levels:
+Skills extend the agent's capabilities. PiStudio supports two levels:
 
 ### Global Skills
 
@@ -51,7 +51,7 @@ Skills that apply only to a specific project. Accessible from the project contex
 
 ## Extensions
 
-Extensions add new functionality to PiDeck itself (not the agent). Manage them in the Extensions tab:
+Extensions add new functionality to PiStudio itself (not the agent). Manage them in the Extensions tab:
 
 - **Installed Extensions** — View and manage installed extensions.
 - **Extension Store** — Browse and install community extensions.

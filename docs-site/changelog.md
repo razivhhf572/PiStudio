@@ -2,8 +2,8 @@
 
 完整更新日志仍维护在仓库根目录：
 
-- [中文 CHANGELOG](https://github.com/ayuayue/PiDeck/blob/main/CHANGELOG.zh-CN.md)
-- [English CHANGELOG](https://github.com/ayuayue/PiDeck/blob/main/CHANGELOG.md)
+- [中文 CHANGELOG](https://github.com/ayuayue/PiStudio/blob/main/CHANGELOG.zh-CN.md)
+- [English CHANGELOG](https://github.com/ayuayue/PiStudio/blob/main/CHANGELOG.md)
 
 ## v0.7.4-beta
 
@@ -67,7 +67,7 @@
 - 🚀 **多段用量徽标**
 - 🚀 **DSH 用量查询链路**
 - 🚀 **用量查询 AI 辅助**
-- 🚀 **PiDeck 特有文件统一收拢**
+- 🚀 **PiStudio 特有文件统一收拢**
 - 🚀 **主动更新提示（无配额方案）**
 - 🚀 **发布流程配套 latest.yml**
 - 🚀 **检查超时防护**

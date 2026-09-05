@@ -106,6 +106,8 @@ import {
   setSessionDraftAtom,
   cacheSessionMessagesAtom,
   upsertSessionAtom,
+  welcomeModelSelectionAtom,
+  welcomeThinkingSelectionAtom,
 } from "./atoms";
 import {
   applyDshGoalSendTransform,
@@ -224,7 +226,7 @@ export function App() {
             <path fill="url(#root-loading-logo-silver)" d="M517.36 400H634.72V634.72H517.36Z" />
           </svg>
         </div>
-        <strong className="text-[40px] font-bold tracking-[0.06em]">PiDeck</strong>
+        <strong className="text-[40px] font-bold tracking-[0.06em]">PiStudio</strong>
         <span>{t("app.preloadMissing")}</span>
       </div>
     );
@@ -717,6 +719,10 @@ export function App() {
   // 派生出「有效」后端：设置值经 DSH runtime 安装态钳制（runtime 不可用时 dsh → pi）。
   // 所有新建会话入口统一读这个值，避免设置里残留 dsh 而 runtime 已不可用导致裸报错。
   const effectiveAgentBackend = useAtomValue(effectiveAgentBackendAtom);
+  // 引导页「本次」主动选择的模型/思考档位（ComposerPickerHost 无 record 分支写入）：
+  // 创建会话时直接指名（优先于一切默认解析），保证「选了就生效」。
+  const welcomeModelSelection = useAtomValue(welcomeModelSelectionAtom);
+  const welcomeThinkingSelection = useAtomValue(welcomeThinkingSelectionAtom);
 
   // 忙碌时发送的默认投递行为同步给发送链路（composer/App 决策时刻从 atom 读取，
   // 设置保存后无需重挂载会话即可生效，与 defaultAgentBackend 同一模式）。
@@ -738,7 +744,7 @@ export function App() {
   const [webServiceChanging, setWebServiceChanging] = useState(false);
   const [appInfo, setAppInfo] = useState<AppInfo>({
     version: "-",
-    releasesUrl: "https://github.com/ayuayue/PiDeck/releases",
+    releasesUrl: "https://github.com/ayuayue/PiStudio/releases",
     // 同步判定，避免 Mac 首帧在 appInfo IPC 返回前误画 Win 窗口按钮
     platform: detectRendererPlatform(),
     homeDir: "",
@@ -1545,10 +1551,11 @@ export function App() {
         throw new Error(t("app.guideBootstrapUnavailable"));
       }
       const promotion = (async () => {
-        // 引导页 picker 无 record 分支把模型选择存进 localStorage；创建时作为
-        // 「偏好」交给主进程解析（优先级：显式默认 > 偏好 > 上次使用 > 空），
-        // 与底栏显示同源，避免显示/套用分叉。思考级别不随偏好传入——
-        // 一律走默认档位（settings.defaultThinkingLevel），由解析器决定。
+        // 引导页 picker 无 record 分支：本次主动选择写入 atom（welcomeModelSelection/
+        // welcomeThinkingSelection），这里直接作为 model/thinkingLevel 指名传入——
+        // 用户明确选择优先于一切默认解析（含显式默认模型），保证「选了就生效」。
+        // 未做本次选择时，才把 localStorage 偏好（welcomeModel）交给主进程按
+        // 「显式默认 > 偏好 > 上次使用 > 空」解析（与底栏显示同源）。
         const welcomeModel = readWelcomeModelPreference()?.model;
         // 统一创建 draft 会话（Chat 项目也走普通会话、可保存）：创建不拉 pi，
         // selectSessionCommand 同步切页、立即进入会话页；匿名会话仅保留给侧栏
@@ -1559,7 +1566,9 @@ export function App() {
           projectId: project.id,
           title: effectiveAgentBackend === "dsh" ? `${project.name} DSH` : `${project.name} agent`,
           backend: effectiveAgentBackend,
-          ...(welcomeModel ? { welcomeModel } : {}),
+          ...(welcomeModelSelection ? { model: welcomeModelSelection } : {}),
+          ...(welcomeThinkingSelection ? { thinkingLevel: welcomeThinkingSelection } : {}),
+          ...(!welcomeModelSelection && welcomeModel ? { welcomeModel } : {}),
         });
         upsertSession(session);
         // 引导页发送时 useSessionSend 已把 user 消息乐观写入虚拟会话 cache；
@@ -1597,6 +1606,8 @@ export function App() {
       upsertSession,
       workspaceChrome,
       effectiveAgentBackend,
+      welcomeModelSelection,
+      welcomeThinkingSelection,
     ],
   );
 
@@ -1695,7 +1706,7 @@ export function App() {
       .then((info) => {
         setAppInfo(info);
         // 与窗口标题一致：开发态功能分支时文档标题带分支名
-        document.title = info.devBranch ? `PiDeck · ${info.devBranch}` : "PiDeck";
+        document.title = info.devBranch ? `PiStudio · ${info.devBranch}` : "PiStudio";
       })
       .catch(() => undefined);
     void api.imagegen.getConfig().then(setImageGenConfig).catch(() => undefined);
@@ -3166,7 +3177,7 @@ export function App() {
       settingsLoaded={settingsLoaded}
       onExpandedProjectsReady={() => setExpandedProjectsReady(true)}
       // 官网主页是品牌入口，强制系统浏览器打开：不受「链接打开方式=内置浏览器」设置影响
-      onOpenHomepage={() => void api.app.openExternal("https://ayuayue.github.io/PiDeck/", true)}
+      onOpenHomepage={() => void api.app.openExternal("https://ayuayue.github.io/PiStudio/", true)}
       // 底栏主题按钮：点击在浅/暗之间翻转；跟随系统/跟随时间退出自动时按当前实际明暗翻到对面，
       // 保证每次点击都有可见变化。落库后只合并 theme 字段，data-theme 由外观 effect 依赖 settings.theme 重应用。
       themeMode={settings.theme}

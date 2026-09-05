@@ -20,7 +20,7 @@ type LatestReleaseFetcher = (url: string) => Promise<LatestReleaseResponse>;
 
 /**
  * 从 GitHub latest release 重定向 URL 提取发布版本。
- * URL 例：`https://github.com/ayuayue/PiDeck/releases/tag/v0.7.4`。
+ * URL 例：`https://github.com/ayuayue/PiStudio/releases/tag/v0.7.4`。
  */
 export function parseGitHubReleaseVersion(url: string): string | null {
 	try {

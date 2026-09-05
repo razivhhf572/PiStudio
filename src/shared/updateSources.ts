@@ -3,7 +3,7 @@
  *
  * 背景：GitHub provider 的 githubUrl() 只支持 host 覆盖（企业版语义），拼不出
  * 「https://<镜像>/https://github.com/...」前缀代理的路径，因此镜像走 generic
- * provider：把 `镜像前缀 + /ayuayue/PiDeck/releases/latest/download` 整体作为
+ * provider：把 `镜像前缀 + /ayuayue/PiStudio/releases/latest/download` 整体作为
  * feed baseUrl，latest.yml 与安装包/blockmap 的相对路径都会拼在其后。
  *
  * 镜像可用性变化快：维护者应在发版前实测（curl -L 镜像/releases/latest/download/latest.yml），
@@ -15,7 +15,7 @@ import type { UpdateSourceId } from "./types/settings";
 
 /** 更新所指向的 GitHub 仓库坐标（唯一事实来源，与 main/update/releaseRepo.ts 同源）。 */
 export const UPDATE_REPO_OWNER = "ayuayue";
-export const UPDATE_REPO = "PiDeck";
+export const UPDATE_REPO = "PiStudio";
 
 /** generic feed 的固定路径段：GitHub 把 `releases/latest/download/<asset>` 302 到当前最新 release。 */
 export const RELEASES_LATEST_DOWNLOAD_PATH = "/releases/latest/download";
@@ -27,7 +27,7 @@ export const UPDATE_SOURCE_MIRRORS: ReadonlyArray<{ id: UpdateSourceId; host: st
   { id: "ghproxy-cxkpro", host: "https://ghproxy.cxkpro.top" },
 ];
 
-/** GitHub Release 仓库根路径，例如 `https://github.com/ayuayue/PiDeck`。 */
+/** GitHub Release 仓库根路径，例如 `https://github.com/ayuayue/PiStudio`。 */
 export function gitHubReleasesBase(): string {
   return `https://github.com/${UPDATE_REPO_OWNER}/${UPDATE_REPO}`;
 }

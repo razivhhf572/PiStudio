@@ -46,12 +46,12 @@ export const CATALOG_UPDATE_ALLOWED_BRANCHES = ["main", "dev"] as const;
 function sourceBaseUrls(branch: string): { catalog: string; manifest: string }[] {
 	return [
 		{
-			catalog: `https://cdn.jsdelivr.net/gh/ayuayue/PiDeck@${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
-			manifest: `https://cdn.jsdelivr.net/gh/ayuayue/PiDeck@${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
+			catalog: `https://cdn.jsdelivr.net/gh/ayuayue/PiStudio@${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
+			manifest: `https://cdn.jsdelivr.net/gh/ayuayue/PiStudio@${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
 		},
 		{
-			catalog: `https://raw.githubusercontent.com/ayuayue/PiDeck/${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
-			manifest: `https://raw.githubusercontent.com/ayuayue/PiDeck/${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
+			catalog: `https://raw.githubusercontent.com/ayuayue/PiStudio/${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
+			manifest: `https://raw.githubusercontent.com/ayuayue/PiStudio/${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
 		},
 	];
 }
@@ -308,7 +308,7 @@ export class PiAiCatalogUpdater {
 			const response = await this.fetchImpl(url, {
 				signal: controller.signal,
 				redirect: "follow",
-				headers: { "user-agent": "PiDeck-catalog-updater" },
+				headers: { "user-agent": "PiStudio-catalog-updater" },
 			});
 			if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
 			const buffer = await response.arrayBuffer();

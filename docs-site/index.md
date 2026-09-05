@@ -2,19 +2,19 @@
 layout: home
 
 hero:
-  name: PiDeck
+  name: PiStudio
   text: 多项目 pi Agent 桌面工作台
   tagline: 在统一的桌面工作区中管理本地 pi 编码助手会话、配置、Git 和终端，支持 Windows、macOS、Linux，让本地 AI 编码工作流更稳定高效。
   actions:
     - theme: brand
       text: 下载最新版本
-      link: https://github.com/ayuayue/PiDeck/releases
+      link: https://github.com/ayuayue/PiStudio/releases
     - theme: alt
       text: 快速开始
       link: /guide/getting-started
     - theme: alt
       text: 查看 GitHub
-      link: https://github.com/ayuayue/PiDeck
+      link: https://github.com/ayuayue/PiStudio
 
 features:
   - title: 多项目工作区
@@ -38,13 +38,13 @@ features:
 ---
 
 <figure class="home-showcase">
-  <img src="/images/overview.png" alt="PiDeck 工作区与对话界面截图">
+  <img src="/images/overview.png" alt="PiStudio 工作区与对话界面截图">
   <figcaption>工作区、会话、文件抽屉、Git 分支和工具调用集中在同一个桌面窗口中。</figcaption>
 </figure>
 
 ## 面向本地开发的桌面控制台
 
-`PiDeck` 不是 pi 的分支。它是一个轻量 Electron 外壳，通过启动多个 `pi --mode rpc` 进程，把项目管理、会话管理、配置管理和桌面交互整合起来，Agent 能力仍由 pi 原生提供。
+`PiStudio` 不是 pi 的分支。它是一个轻量 Electron 外壳，通过启动多个 `pi --mode rpc` 进程，把项目管理、会话管理、配置管理和桌面交互整合起来，Agent 能力仍由 pi 原生提供。
 
 <div class="info-strip">
   <div>
@@ -88,7 +88,7 @@ features:
 
 ## 社区交流
 
-加入 PiDeck QQ 群进行交流、反馈和讨论：
+加入 PiStudio QQ 群进行交流、反馈和讨论：
 
 **1026218644**
 
@@ -104,7 +104,7 @@ features:
 
 ## 赞助
 
-如果 PiDeck 对你有帮助，欢迎请作者喝杯咖啡。微信扫码即可赞赏，感谢支持。
+如果 PiStudio 对你有帮助，欢迎请作者喝杯咖啡。微信扫码即可赞赏，感谢支持。
 
 <p class="sponsor-block">
   <img class="sponsor-qr" src="/images/wechat_pay.png" alt="微信赞赏码" />

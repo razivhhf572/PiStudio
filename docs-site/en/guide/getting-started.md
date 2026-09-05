@@ -1,16 +1,16 @@
 # Quick Start
 
-There are two ways to use PiDeck: download a pre-built installer or run from source.
+There are two ways to use PiStudio: download a pre-built installer or run from source.
 
 ## Download & Install
 
-1. Go to the [GitHub Releases](https://github.com/ayuayue/PiDeck/releases) page.
+1. Go to the [GitHub Releases](https://github.com/ayuayue/PiStudio/releases) page.
 2. Download the latest installer for your platform:
    - **Windows**: `.exe` installer or `.zip` portable
    - **macOS**: `.dmg` (Apple Silicon / Intel)
    - **Linux**: `.AppImage` or `.deb`
 3. Run the installer and follow the setup wizard.
-4. Launch PiDeck — you'll see the project workspace and session panel.
+4. Launch PiStudio — you'll see the project workspace and session panel.
 
 ## Run from Source
 
@@ -24,8 +24,8 @@ There are two ways to use PiDeck: download a pre-built installer or run from sou
 
 ```bash
 # Clone the repository
-git clone https://github.com/ayuayue/PiDeck.git
-cd PiDeck
+git clone https://github.com/ayuayue/PiStudio.git
+cd PiStudio
 
 # Install dependencies
 npm install
@@ -49,4 +49,4 @@ Output files are placed in the `release/` directory.
 
 1. Click **"Add Project"** or drag a folder into the workspace panel.
 2. Select a project to open its session view.
-3. Type your prompt in the composer and press Enter — PiDeck will start a pi RPC agent for that project.
+3. Type your prompt in the composer and press Enter — PiStudio will start a pi RPC agent for that project.

@@ -1092,7 +1092,7 @@ export function registerSystemIpc(deps: SystemIpcDeps): void {
 			}
 			if (settings.wslEnabled && settings.wslDistro && settings.wslUser && resolveWslEnvironment) {
 				const environment = await resolveWslEnvironment(settings.wslDistro, settings.wslUser, {
-					warn: (msg: string, detail: unknown) => console.warn("[PiDeck] " + String(msg), detail),
+					warn: (msg: string, detail: unknown) => console.warn("[PiStudio] " + String(msg), detail),
 				});
 				if (configureSessionScannerWsl) await configureSessionScannerWsl(environment);
 				if (configureSkillManagerWsl) configureSkillManagerWsl(environment);

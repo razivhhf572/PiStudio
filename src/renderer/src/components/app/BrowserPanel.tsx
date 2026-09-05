@@ -18,7 +18,7 @@ import { Input } from "../ui-shadcn/input";
 // Button 收口状态（P0）：工具栏/导航/UA 菜单按钮已换 shadcn Button（ghost/outline + 原尺寸 class 保留）。
 // 保留原生：.browser-tab-close（16px 微型关闭钮，Button 最小档 icon-xs 24px 无法替代）。
 
-const DEFAULT_HOME = "https://ayuayue.github.io/PiDeck/";
+const DEFAULT_HOME = "https://ayuayue.github.io/PiStudio/";
 
 type DeviceType = "pc" | "mobile" | "tablet";
 
@@ -76,7 +76,7 @@ export const moduleState: { tabs: TabEntry[]; activeTabId: string | null; device
 function ensureInitialTab() {
 	if (moduleState.tabs.length > 0) return;
 	const id = genTabId();
-	moduleState.tabs = [{ id, title: "PiDeck", url: DEFAULT_HOME }];
+	moduleState.tabs = [{ id, title: "PiStudio", url: DEFAULT_HOME }];
 	moduleState.activeTabId = id;
 }
 

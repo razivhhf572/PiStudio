@@ -52,4 +52,4 @@ env:
 ```
 
 `docs-site/public/CNAME` 写入 `pideck.caoayu.top`，构建后进入产物，避免部署冲掉域名绑定。
-若临时需要兼容旧地址 `https://ayuayue.github.io/PiDeck/`，可本地设置 `VITEPRESS_BASE=/PiDeck/`。
+若临时需要兼容旧地址 `https://ayuayue.github.io/PiStudio/`，可本地设置 `VITEPRESS_BASE=/PiStudio/`。

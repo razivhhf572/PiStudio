@@ -309,7 +309,7 @@ export class WebServiceManager {
 			if (url.pathname === "/api/health") {
 				this.sendJson(response, {
 					ok: true,
-					service: "PiDeck",
+					service: "PiStudio",
 					host,
 					port: this.getPort(server, port),
 				});

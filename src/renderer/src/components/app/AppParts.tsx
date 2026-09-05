@@ -481,12 +481,12 @@ export function BrandLockup(props: { replayToken?: number } = {}) {
 	useEffect(() => {
 		void loadDevBranch().then(setBranch);
 	}, []);
-	const brandTitle = branch ? `PiDeck · ${branch}` : "PiDeck";
+	const brandTitle = branch ? `PiStudio · ${branch}` : "PiStudio";
 	return (
 		<div className="brand-lockup flex h-full min-w-0 items-center gap-2" aria-label={brandTitle} title={branch ? brandTitle : undefined}>
 			<PiLogoCanvas size={18} autoPlay playOnClick replayToken={props.replayToken} />
 			{/* 视觉变形只作用于字标本身，品牌语义仍由外层 aria-label 保留。 */}
-			<span className="brand-wordmark translate-x-0.5 truncate text-[18px] font-[PiDeckDepartureMono] font-normal uppercase leading-none text-zinc-950 dark:text-white" aria-hidden="true">PiDeck</span>
+			<span className="brand-wordmark translate-x-0.5 truncate text-[18px] font-[PiDeckDepartureMono] font-normal uppercase leading-none text-zinc-950 dark:text-white" aria-hidden="true">PiStudio</span>
 		</div>
 	);
 }

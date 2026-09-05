@@ -1,4 +1,4 @@
-# PiDeck
+# PiStudio
 
 [English](README.en.md) · [LinuxDO 友链](https://linux.do)
 
@@ -18,18 +18,18 @@
 </picture>
 <!-- star-history:end -->
 
-![PiDeck 工作台全景](docs/images/readme/hero.png)
-![PiDeck 工作台设置](docs/images/readme/setting.png)
+![PiStudio 工作台全景](docs/images/readme/hero.png)
+![PiStudio 工作台设置](docs/images/readme/setting.png)
 
 ---
 
 ## 这是什么
 
-**PiDeck** 是一个开源的 pi 和 DSH 桌面工作台，用于在本地项目目录中统一管理 pi Agent 会话，并支持导入 Codex、Claude 本地会话以便统一浏览和恢复。基于 Electron + TypeScript 构建，提供多项目工作区、AI 会话管理、Git 集成、内置终端、模型配置和插件扩展能力，让本地 AI 编码助手在多项目环境中保持统一、可追溯、可配置。
+**PiStudio** 是一个开源的 pi 和 DSH 桌面工作台，用于在本地项目目录中统一管理 pi Agent 会话，并支持导入 Codex、Claude 本地会话以便统一浏览和恢复。基于 Electron + TypeScript 构建，提供多项目工作区、AI 会话管理、Git 集成、内置终端、模型配置和插件扩展能力，让本地 AI 编码助手在多项目环境中保持统一、可追溯、可配置。
 
 **适合谁用：** 希望在桌面端同时管理多个本地项目的 AI 编程助手会话、需要统一查看会话历史与 Git 状态、并希望以图形化方式管理 pi 配置的开发者。
 
-`PiDeck` **不是** pi 的分支。它是一个轻量 Electron 外壳，通过启动多个 `pi --mode rpc` 进程，将项目管理、会话管理、对话界面、配置管理和工具编排整合到一个原生桌面应用中——所有 Agent 能力由 pi 原生提供，会话文件也由 pi 原生读写，PiDeck 不复刻、不劫持。除 pi 外，PiDeck 还深融合了 **DSH（DeepSeek Harness）** 后端，详见 [DSH 后端](#-dsh-后端)。
+`PiStudio` **不是** pi 的分支。它是一个轻量 Electron 外壳，通过启动多个 `pi --mode rpc` 进程，将项目管理、会话管理、对话界面、配置管理和工具编排整合到一个原生桌面应用中——所有 Agent 能力由 pi 原生提供，会话文件也由 pi 原生读写，PiStudio 不复刻、不劫持。除 pi 外，PiStudio 还深融合了 **DSH（DeepSeek Harness）** 后端，详见 [DSH 后端](#-dsh-后端)。
 
 ---
 
@@ -38,7 +38,7 @@
 
 | Logo | 简介 |
 | --- | --- |
-| <a href="https://88api.ai/sign-up?aff=DAEe"><img src="docs/images/88vip.png" alt="88API" width="120"></a> | [**88API Token聚合站**](https://88api.ai/sign-up?aff=DAEe)<br>88API 是一站式多模型 API 聚合平台，平台由海外企业运营，稳定高效支持开票。平台提供 DeepSeek 官转和开源渠道，价格低至 5 折，完美适配PiDeck项目。一个 API Key 即可统一接入海内外多种模型，覆盖文本对话、图片、音频、音乐和视频生成接口，适用于 AI 编程、Agent 自动化、内容创作及应用开发。<br><br>[**立即注册 →**](https://88api.ai/sign-up?aff=DAEe) |
+| <a href="https://88api.ai/sign-up?aff=DAEe"><img src="docs/images/88vip.png" alt="88API" width="120"></a> | [**88API Token聚合站**](https://88api.ai/sign-up?aff=DAEe)<br>88API 是一站式多模型 API 聚合平台，平台由海外企业运营，稳定高效支持开票。平台提供 DeepSeek 官转和开源渠道，价格低至 5 折，完美适配PiStudio项目。一个 API Key 即可统一接入海内外多种模型，覆盖文本对话、图片、音频、音乐和视频生成接口，适用于 AI 编程、Agent 自动化、内容创作及应用开发。<br><br>[**立即注册 →**](https://88api.ai/sign-up?aff=DAEe) |
 
 </details>
 
@@ -46,7 +46,7 @@
 
 ## 📑 目录
 
-- [PiDeck](#pideck)
+- [PiStudio](#pistudio)
   - [这是什么](#这是什么)
   - [📑 目录](#-目录)
   - [✨ 核心亮点](#-核心亮点)
@@ -129,7 +129,7 @@
 | **待办条** | Composer 上方常驻 Agent 任务列表，待处理 / 进行中 / 已完成进度一目了然。 |
 | **消息编辑/删除** | AI 回答和用户消息均支持复制、编辑和删除，编辑后回填到输入框重新发送。 |
 | **会话管理** | 新建、重命名、复制、导出 HTML、删除历史会话、重启与重新加载、关闭 Agent——侧栏或右键菜单即可完成。 |
-| **会话导入** | 项目右键导入 Codex 和 Claude 本地会话，转换为 PiDeck 历史会话后继续浏览和恢复。 |
+| **会话导入** | 项目右键导入 Codex 和 Claude 本地会话，转换为 PiStudio 历史会话后继续浏览和恢复。 |
 | **刻度定位轴** | 会话右缘刻度轴映射时间线位置，长会话点击即可跳转到对应消息。 |
 | **内容行宽限制** | 可拖拽的内容宽度滑块，默认不限宽，适应长行代码阅读或紧凑布局。 |
 
@@ -180,7 +180,7 @@
 
 ## 🐳 DSH 后端
 
-除 pi 外，PiDeck 还深融合了 **DSH（DeepSeek Harness，DeepSeek 官方 Agent Harness）**：同一项目下 pi 与 DSH 会话并存、自由切换浏览，会话列表与头部均有 pi / DSH 徽标区分。
+除 pi 外，PiStudio 还深融合了 **DSH（DeepSeek Harness，DeepSeek 官方 Agent Harness）**：同一项目下 pi 与 DSH 会话并存、自由切换浏览，会话列表与头部均有 pi / DSH 徽标区分。
 
 - **零端口深融合** —— DSH host 以 utilityProcess 内嵌引导运行，无 `dsh web`、无监听端口、无后台 HTTP，懒启动不拖慢应用打开速度。
 - **完整会话能力** —— 历史分页浏览、fork（从锚点裁剪分叉，fork 点文案回填输入框）、`/compact` 压缩上下文；应用重启后自动恢复原会话。
@@ -196,7 +196,7 @@
 ## 🏗️ 工作原理
 
 ```txt
-PiDeck
+PiStudio
 ├─ Electron 主进程
 │  ├─ 管理项目记录
 │  ├─ 启动 pi --mode rpc 进程（每个会话一个独立进程）
@@ -223,7 +223,7 @@ PiDeck
    └─ 使用 pi 原生会话 / 工具 / 模型 / 上下文
 ```
 
-核心设计原则：**一个 Agent 会话 = 一个 pi RPC 进程**，确保会话隔离，让 pi 继续负责其原生能力；PiDeck 与 pi 之间只通过 stdio JSON-RPC 通信。DSH 后端以 utilityProcess 内嵌引导，同样不引入额外网络端口。
+核心设计原则：**一个 Agent 会话 = 一个 pi RPC 进程**，确保会话隔离，让 pi 继续负责其原生能力；PiStudio 与 pi 之间只通过 stdio JSON-RPC 通信。DSH 后端以 utilityProcess 内嵌引导，同样不引入额外网络端口。
 
 ---
 
@@ -231,9 +231,9 @@ PiDeck
 
 **Windows**、**macOS**、**Linux** 平台的预构建安装包在 GitHub Release 中发布：
 
-👉 **[GitHub Releases](https://github.com/ayuayue/PiDeck/releases)**
+👉 **[GitHub Releases](https://github.com/ayuayue/PiStudio/releases)**
 
-> PiDeck 需要单独安装 `pi` CLI 并确保其加入系统 `PATH`。
+> PiStudio 需要单独安装 `pi` CLI 并确保其加入系统 `PATH`。
 
 环境要求：
 
@@ -252,8 +252,8 @@ pi --mode rpc
 ## 🧰 快速开始（从源码运行）
 
 ```bash
-git clone https://github.com/ayuayue/PiDeck.git
-cd PiDeck
+git clone https://github.com/ayuayue/PiStudio.git
+cd PiStudio
 npm install
 npm run make-icon
 npm run dev
@@ -265,21 +265,21 @@ npm run dev
 
 ## ❓ 常见问题 FAQ
 
-**Q：PiDeck 和 pi 是什么关系？会改动我的会话文件吗？**
+**Q：PiStudio 和 pi 是什么关系？会改动我的会话文件吗？**
 
-A：PiDeck 是 pi 的桌面外壳（不是分支）：Agent 行为、工具调用、会话读写、模型调用全部由 pi 原生完成，PiDeck 只负责窗口管理、进程生命周期、会话浏览、Git 面板、终端和设置这些「框架层」的事，两者通过 stdio JSON-RPC 通信。pi / DSH 会话仍由各自后端原生读写，PiDeck 不改变原有会话格式；导入的 Codex / Claude 会话会转换为 PiDeck 历史副本，不影响原文件。
+A：PiStudio 是 pi 的桌面外壳（不是分支）：Agent 行为、工具调用、会话读写、模型调用全部由 pi 原生完成，PiStudio 只负责窗口管理、进程生命周期、会话浏览、Git 面板、终端和设置这些「框架层」的事，两者通过 stdio JSON-RPC 通信。pi / DSH 会话仍由各自后端原生读写，PiStudio 不改变原有会话格式；导入的 Codex / Claude 会话会转换为 PiStudio 历史副本，不影响原文件。
 
 **Q：启动后提示找不到 pi？**
 
-A：PiDeck 依赖系统 `PATH` 中的 `pi` 命令。先在终端执行 `pi --version` 确认可用；若不可用，请先安装 pi CLI 并配置好 Provider / API Key，再启动 PiDeck。
+A：PiStudio 依赖系统 `PATH` 中的 `pi` 命令。先在终端执行 `pi --version` 确认可用；若不可用，请先安装 pi CLI 并配置好 Provider / API Key，再启动 PiStudio。
 
 **Q：支持哪些模型？在哪配置？**
 
-A：模型能力完全由 pi 的配置决定。PiDeck 提供可视化编辑器管理 `models.json` / `auth.json` / `settings.json`，支持连接测试；DSH 后端使用 DeepSeek 系模型，生图模式使用独立配置的生图供应商（OpenAI / 火山方舟 / SiliconFlow 等）。
+A：模型能力完全由 pi 的配置决定。PiStudio 提供可视化编辑器管理 `models.json` / `auth.json` / `settings.json`，支持连接测试；DSH 后端使用 DeepSeek 系模型，生图模式使用独立配置的生图供应商（OpenAI / 火山方舟 / SiliconFlow 等）。
 
 **Q：DSH 是什么？怎么启用？**
 
-A：DSH（DeepSeek Harness）是 DeepSeek 官方的 Agent Harness，PiDeck 对其做了深融合，能力清单见上文 [DSH 后端](#-dsh-后端)专节。在设置页的 DSH 分页完成配置后，新建会话时选择 DSH 后端即可。
+A：DSH（DeepSeek Harness）是 DeepSeek 官方的 Agent Harness，PiStudio 对其做了深融合，能力清单见上文 [DSH 后端](#-dsh-后端)专节。在设置页的 DSH 分页完成配置后，新建会话时选择 DSH 后端即可。
 
 **Q：会收集我的数据吗？**
 
@@ -287,7 +287,7 @@ A：应用默认发送匿名、低频的 `app_heartbeat` 使用统计（可在�
 
 **Q：遇到问题如何反馈？**
 
-A：欢迎加入文末 QQ 交流群反馈，或到 [GitHub Issues](https://github.com/ayuayue/PiDeck/issues) 提交问题；排查问题时可在设置页导出日志。
+A：欢迎加入文末 QQ 交流群反馈，或到 [GitHub Issues](https://github.com/ayuayue/PiStudio/issues) 提交问题；排查问题时可在设置页导出日志。
 
 ---
 
@@ -355,13 +355,13 @@ src/
 - 提交 Issue 前请先搜索是否已有同类问题；
 - 代码 PR 请遵循仓库的架构约定与提交规范，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-感谢所有为 PiDeck 做出贡献的人！完整名单请查看 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
+感谢所有为 PiStudio 做出贡献的人！完整名单请查看 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
 
 ---
 
 ## 💬 社区交流
 
-欢迎加入 PiDeck QQ 群进行交流、反馈和讨论：
+欢迎加入 PiStudio QQ 群进行交流、反馈和讨论：
 
 **1026218644**
 
@@ -375,7 +375,7 @@ src/
 
 ## ☕ 赞助
 
-如果 PiDeck 对你有帮助，欢迎请作者喝杯咖啡。微信扫码即可赞赏，感谢支持。
+如果 PiStudio 对你有帮助，欢迎请作者喝杯咖啡。微信扫码即可赞赏，感谢支持。
 
 <p align="center">
   <img src="docs/images/wechat_pay.png" alt="微信赞赏码" width="280" />

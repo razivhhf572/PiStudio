@@ -26,28 +26,28 @@ function expectTarget(argv, expected) {
   assert.equal(target?.agentId, expected.agentId);
 }
 
-test("解析 pideck://session/ 协议 URL（通知点击主路径）", () => {
-  const argv = ["C:\\Program Files\\PiDeck\\PiDeck.exe", `pideck://session/${SESSION_ID}`];
+test("解析 pistudio://session/ 协议 URL（通知点击主路径）", () => {
+  const argv = ["C:\\\\Program Files\\\\PiStudio\\\\PiStudio.exe", `pistudio://session/${SESSION_ID}`];
   expectTarget(argv, { sessionId: SESSION_ID, agentId: undefined });
 });
 
-test("解析 pideck://agent/ 兼容格式（旧 toast 兜底）", () => {
-  const argv = ["PiDeck.exe", `pideck://agent/${AGENT_ID}`];
+test("解析 pistudio://agent/ 兼容格式（旧 toast 兜底）", () => {
+  const argv = ["PiStudio.exe", `pistudio://agent/${AGENT_ID}`];
   expectTarget(argv, { sessionId: undefined, agentId: AGENT_ID });
 });
 
 test("协议 URL 大小写不敏感", () => {
   const upper = SESSION_ID.toUpperCase();
-  const argv = ["PiDeck.exe", `PIDECK://SESSION/${upper}`];
+  const argv = ["PiStudio.exe", `PISTUDIO://SESSION/${upper}`];
   expectTarget(argv, { sessionId: upper, agentId: undefined });
 });
 
 test("无通知唤起参数时返回 undefined（仅聚焦窗口）", () => {
-  assert.equal(extractFocusTargetFromArgv(["PiDeck.exe"]), undefined);
+  assert.equal(extractFocusTargetFromArgv(["PiStudio.exe"]), undefined);
   assert.equal(extractFocusTargetFromArgv([]), undefined);
   assert.equal(extractFocusTargetFromArgv(undefined), undefined);
 });
 
-test("非 agent/session 协议（如 pideck:// 根地址）不产生跳转目标", () => {
-  assert.equal(extractFocusTargetFromArgv(["PiDeck.exe", "pideck://"]), undefined);
+test("非 agent/session 协议（如 pistudio:// 根地址）不产生跳转目标", () => {
+  assert.equal(extractFocusTargetFromArgv(["PiStudio.exe", "pistudio://"]), undefined);
 });

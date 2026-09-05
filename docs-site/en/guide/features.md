@@ -1,6 +1,6 @@
 # Features
 
-PiDeck brings together project management, session management, Git operations, and terminal access in a single desktop application.
+PiStudio brings together project management, session management, Git operations, and terminal access in a single desktop application.
 
 ## Multi-Project Workspace
 
@@ -8,14 +8,14 @@ Manage multiple local project directories in one window. Add, search, reorder, a
 
 ## Session History & Restore
 
-Never lose context. PiDeck saves every session, including:
+Never lose context. PiStudio saves every session, including:
 
 - Full conversation history
 - Tool calls and agent responses
 - File changes made during the session
 - Timestamps for every interaction
 
-You can restore any previous session and continue where you left off. PiDeck also supports importing sessions from Claude Code and OpenAI Codex.
+You can restore any previous session and continue where you left off. PiStudio also supports importing sessions from Claude Code and OpenAI Codex.
 
 ## Git Integration
 
@@ -31,7 +31,7 @@ The built-in Git panel provides a visual interface for common Git operations:
 
 ## File Editor
 
-Edit files without leaving PiDeck:
+Edit files without leaving PiStudio:
 
 - Up to 5 concurrent file tabs
 - Monaco Editor (same engine as VS Code)
@@ -72,7 +72,7 @@ Visual editors for all settings:
 
 ## Cross-Platform
 
-PiDeck runs on all major platforms:
+PiStudio runs on all major platforms:
 
 - **Windows** — NSIS installer or portable zip
 - **macOS** — DMG for Apple Silicon and Intel

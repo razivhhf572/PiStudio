@@ -56,7 +56,7 @@ const isDevBuild = !app.isPackaged || __PIDECK_DEV_BUILD__;
 const isE2E = process.env.PIDECK_E2E === "1";
 
 // 开发态与正式版隔离 userData。
-// 否则 npm run dev 会与已安装的 PiDeck 共用数据/锁，表现为「开发启动被复用到正式版窗口」。
+// 否则 npm run dev 会与已安装的 PiStudio 共用数据/锁，表现为「开发启动被复用到正式版窗口」。
 // 未打包的 npm run dev：功能分支再按 git 分支名拆目录（pi-desktop-dev-<branch>），
 // 避免多个 worktree 同时启动共用 catalog / 单实例锁 / DSH home。main/dev 仍用历史目录。
 // 打包的 dist:win:dev 仍固定 pi-desktop-dev（与脚本约定一致，复用现有开发配置）。
@@ -124,18 +124,18 @@ app.commandLine.appendSwitch("js-flags", "--max-old-space-size=384");
 if (process.platform === "win32") {
 	const devAppId =
 		devUserDataDirName === DEFAULT_DEV_USER_DATA_NAME
-			? "com.ayuayue.pi-desktop-dev"
-			: `com.ayuayue.pi-desktop-dev.${sanitizeDevBranchSegment(devGitBranch ?? "detached")}`;
-	app.setAppUserModelId(isDevBuild ? devAppId : "com.ayuayue.pi-desktop");
+			? "com.ayuayue.pi-studio-dev"
+			: `com.ayuayue.pi-studio-dev.${sanitizeDevBranchSegment(devGitBranch ?? "detached")}`;
+	app.setAppUserModelId(isDevBuild ? devAppId : "com.ayuayue.pi-studio");
 }
 
-// 注册 pideck:// 自定义协议：系统通知点击（toast activationType="protocol"）通过该协议唤起应用，
-// 唤起实例的 argv 携带 pideck://session/<id> URL，主进程据此跳转对应会话。
+// 注册 pistudio:// 自定义协议：系统通知点击（toast activationType="protocol"）通过该协议唤起应用，
+// 唤起实例的 argv 携带 pistudio://session/<id> URL，主进程据此跳转对应会话。
 // 仅 packaged 应用注册：dev 模式跑的是 electron 二进制，注册会把协议关联劫持到 electron.exe，
 // 覆盖已安装正式版的关联；dev 模式下通知点击依赖 Electron 原生 click 事件聚焦即可。
 // 安装包内 electron-builder 的 protocols 配置也会在安装时写入注册表，此处是运行时兜底。
 if (app.isPackaged) {
-	app.setAsDefaultProtocolClient("pideck");
+	app.setAsDefaultProtocolClient("pistudio");
 }
 
 // 按「应用版本」隔离的单实例：同版本复用窗口，不同版本可并行。
@@ -1238,7 +1238,7 @@ function flushPendingFocusTargetOnLoad() {
 
 /**
  * 同版本次实例请求聚焦：窗口已在则前置；若窗口尚未创建/已销毁，ready 后重建。
- * 若唤起源自「点击系统通知」（argv 携带 pideck:// URL），额外向 renderer 发送聚焦目标，
+ * 若唤起源自「点击系统通知」（argv 携带 pistudio:// URL），额外向 renderer 发送聚焦目标，
  * 切换到对应会话；agentId 为兼容旧 toast 的兜底格式，运行时经 coordinator 解析成会话。
  * 挂到顶层 focusExistingWindow，供版本单实例锁的 .focus 信号调用。
  */
@@ -1282,7 +1282,7 @@ function setupTray() {
 	// iconPath 由 electron-vite 的 ?asset 后缀自动解析，打包后也能正确定位
 	const icon = nativeImage.createFromPath(iconPath);
 	tray = new Tray(icon.resize({ width: 16, height: 16 }));
-	tray.setToolTip("PiDeck");
+	tray.setToolTip("PiStudio");
 	// C12：退出清理登记（before-quit 统一 runAll）
 	quitCleanup.register("tray", () => {
 		tray?.destroy();
@@ -1348,7 +1348,7 @@ function printStartupInfo() {
 			"color: #8b5cf6; font-weight: bold;"
 		);
 		console.log(
-			"%c│                      PiDeck Desktop                      │",
+			"%c│                      PiStudio Desktop                    │",
 			"color: #8b5cf6; font-weight: bold; font-size: 16px;"
 		);
 		console.log(
@@ -1371,7 +1371,7 @@ function printStartupInfo() {
 		console.log("%c  Persistent installationType: %c${persistentInstallationType}", "color: #6b7280;", "color: #8b5cf6; font-weight: bold;");
 		console.log("");
 		console.log("%c🐛 Found a bug? Report at:", "color: #6b7280;");
-		console.log("%c  https://github.com/ayuayue/PiDeck/issues", "color: #3b82f6; text-decoration: underline;");
+		console.log("%c  https://github.com/ayuayue/PiStudio/issues", "color: #3b82f6; text-decoration: underline;");
 		console.log("");
 		console.log("%c🎉 Easter egg: You found it! Thanks for exploring.", "color: #ec4899; font-weight: bold;");
 		console.log("");
@@ -1542,8 +1542,8 @@ async function createWindow() {
 		minHeight: 640,
 		// 多 worktree 并行 dev：标题带分支名，任务栏/Alt-Tab 一眼区分窗口
 		title: isolateDevByGitBranch && !isSharedDevBranch(devGitBranch)
-			? `PiDeck · ${devGitBranch}`
-			: "PiDeck",
+			? `PiStudio · ${devGitBranch}`
+			: "PiStudio",
 		icon: iconPath,
 		frame: windowOptions.frame,
 		titleBarStyle: windowOptions.titleBarStyle,
@@ -2222,7 +2222,7 @@ async function sendAgentPromptWithIntegrations(
 	const sessionChatId = bridgeConnected ? bridge.getSessionChatId(input.agentId) : undefined;
 	let agentInstruction: string | undefined;
 	const buildFeishuActionInstruction = (chatId?: string) => [
-		"当前会话已连接飞书聊天。严禁调用 lark-cli、飞书 IM API 或搜索群聊来发送文件；不要询问 chat_id。需要把本地文件发到当前飞书聊天时，最终回答末尾独立一行写 [SEND_FILE:本地文件路径]，PiDeck 会按当前会话绑定自动上传。",
+		"当前会话已连接飞书聊天。严禁调用 lark-cli、飞书 IM API 或搜索群聊来发送文件；不要询问 chat_id。需要把本地文件发到当前飞书聊天时，最终回答末尾独立一行写 [SEND_FILE:本地文件路径]，PiStudio 会按当前会话绑定自动上传。",
 		chatId ? `当前绑定的飞书 chat_id: ${chatId}。这是只读上下文，用于确认当前会话绑定；发送文件仍必须用 [SEND_FILE:本地文件路径]。` : undefined,
 	].filter(Boolean).join("\n");
 
@@ -2248,7 +2248,7 @@ async function sendAgentPromptWithIntegrations(
 			});
 			bridge.trackDocRequest(tab.id, docTitle);
 			void bridge.forwardUserMessageToFeishu(tab.id, input.message).catch((error) => {
-				console.error("[Feishu] forward PiDeck message failed:", error);
+				console.error("[Feishu] forward PiStudio message failed:", error);
 			});
 			agentInstruction = `${buildFeishuActionInstruction(bridge.getSessionChatId(tab.id))}\n创建飞书文档时，先输出完整正文，最后独立一行写 [CREATE_DOC:文档标题]。`;
 		}
@@ -2261,7 +2261,7 @@ async function sendAgentPromptWithIntegrations(
 			});
 			if (input.message.trim()) {
 				void bridge.forwardUserMessageToFeishu(tab.id, input.message).catch((error) => {
-					console.error("[Feishu] forward PiDeck message failed:", error);
+					console.error("[Feishu] forward PiStudio message failed:", error);
 				});
 			}
 		}
@@ -2311,7 +2311,7 @@ function registerIpc() {
 		resolveWslEnvironment: async (distro, user) => {
 			const { resolveWslEnvironment } = await import("./wsl/WslEnvironment");
 			return resolveWslEnvironment(distro, user, {
-				warn: (msg: string, detail: Record<string, unknown>) => console.warn("[PiDeck] " + msg, detail),
+				warn: (msg: string, detail: Record<string, unknown>) => console.warn("[PiStudio] " + msg, detail),
 			});
 		},
 	});
@@ -3700,7 +3700,7 @@ app.whenReady().then(async () => {
 		if (wslEnabled && wslDistro && wslUser) {
 			const { resolveWslEnvironment: resolveWsl2 } = await import("./wsl/WslEnvironment");
 			const wslEnv = await resolveWsl2(wslDistro, wslUser, {
-				warn: (msg: string, detail: unknown) => console.warn("[PiDeck] " + String(msg), detail),
+				warn: (msg: string, detail: unknown) => console.warn("[PiStudio] " + String(msg), detail),
 			});
 			await sessionScanner.configureWsl(wslEnv);
 			agentManager.configureWsl(wslEnv);
@@ -3816,7 +3816,7 @@ app.whenReady().then(async () => {
 	}
 
 	// 冷启动通知唤起：应用未运行时点击系统通知，本进程即为唯一实例（无次实例 .focus 流转），
-	// argv 携带 pideck:// URL，窗口就绪后跳转对应会话。
+	// argv 携带 pistudio:// URL，窗口就绪后跳转对应会话。
 	// 页面仍在加载时直接 send 会丢（preload/React 监听未注册），故走 pending 队列：
 	// did-finish-load 补发一次 + renderer 挂载后主动拉取（见 queueFocusTarget 注释）。
 	// catalog 可能尚未加载完，renderer 侧监听会小间隔重试直到能解析到会话记录。
@@ -3900,7 +3900,7 @@ app.whenReady().then(async () => {
 	void appLogger?.error("app", "Application startup failed", error);
 	void import("electron").then(({ dialog }) => {
 		dialog.showErrorBox(
-			"PiDeck failed to start",
+			"PiStudio failed to start",
 			error instanceof Error ? (error.stack ?? error.message) : String(error),
 		);
 	}).catch(() => undefined);
@@ -3978,7 +3978,7 @@ async function ensurePiSettingsDefaults(configDir: string, piVersionHint?: strin
 	if (changed) {
 		await mkdir(configDir, { recursive: true });
 		await writeFile(filePath, JSON.stringify(current, null, 2), "utf8");
-		console.log('[PiDeck] Ensured pi settings defaults at:', filePath);
+		console.log('[PiStudio] Ensured pi settings defaults at:', filePath);
 	}
 }
 

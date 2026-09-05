@@ -1,13 +1,13 @@
 # Development & Packaging
 
-This guide covers building PiDeck from source and creating distribution packages.
+This guide covers building PiStudio from source and creating distribution packages.
 
 ## Development Setup
 
 ```bash
 # Clone
-git clone https://github.com/ayuayue/PiDeck.git
-cd PiDeck
+git clone https://github.com/ayuayue/PiStudio.git
+cd PiStudio
 
 # Install
 npm install
@@ -53,7 +53,7 @@ src/
 
 ## Packaging
 
-PiDeck uses `electron-builder` for packaging. The build configuration is in `package.json` under the `"build"` key.
+PiStudio uses `electron-builder` for packaging. The build configuration is in `package.json` under the `"build"` key.
 
 ### Platform-Specific Notes
 
@@ -86,10 +86,10 @@ Application update checks always run in the background. `autoDownloadUpdates` is
 
 - **Windows** uses `electron-updater` with the NSIS installer. Upload `latest.yml`, the NSIS `*-setup.exe` named by that manifest, and its matching `*.blockmap` to the same GitHub Release. The portable executable and ZIP are manual-download assets only.
 - **Linux** uses its platform channel metadata (normally `latest-linux.yml`) together with the artifact and blockmap named by that manifest. Keep those files in the same GitHub Release.
-- **macOS** currently checks the latest GitHub Release and opens it for manual installation. Without a Developer ID signature and notarization, PiDeck does not attempt silent replacement or claim a Gatekeeper-safe automatic update path. Upload the DMG/ZIP release assets for both architectures as applicable.
+- **macOS** currently checks the latest GitHub Release and opens it for manual installation. Without a Developer ID signature and notarization, PiStudio does not attempt silent replacement or claim a Gatekeeper-safe automatic update path. Upload the DMG/ZIP release assets for both architectures as applicable.
 
 Run `npm run dist:win` for the Windows release set. Its final output lists only current-version assets and warns when the NSIS updater trio is incomplete.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/ayuayue/PiDeck/blob/main/CONTRIBUTING.md) for contribution guidelines. All contributions are welcome!
+See [CONTRIBUTING.md](https://github.com/ayuayue/PiStudio/blob/main/CONTRIBUTING.md) for contribution guidelines. All contributions are welcome!

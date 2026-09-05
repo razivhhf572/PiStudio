@@ -28,12 +28,12 @@ function nextPatchVersion(version: string): string {
 }
 
 // The default fixture starts Electron directly, whose app version is Electron's version.
-// Packaged verification sets PIDEK_E2E_EXECUTABLE_PATH, so use PiDeck's package version instead.
+// Packaged verification sets PIDEK_E2E_EXECUTABLE_PATH, so use PiStudio's package version instead.
 // Generate a valid next patch at runtime for the local generic feed in both modes.
 const CURRENT_APP_VERSION = readAppUnderTestVersion();
 const UPDATE_VERSION = nextPatchVersion(CURRENT_APP_VERSION);
-const UPDATE_FILE = `PiDeck-${UPDATE_VERSION}-setup.exe`;
-const UPDATE_BYTES = Buffer.from("PiDeck electron-updater E2E fixture payload\n", "utf8");
+const UPDATE_FILE = `PiStudio-${UPDATE_VERSION}-setup.exe`;
+const UPDATE_BYTES = Buffer.from("PiStudio electron-updater E2E fixture payload\n", "utf8");
 const UPDATE_SHA512 = createHash("sha512").update(UPDATE_BYTES).digest("base64");
 
 let feedServer: Server | null = null;

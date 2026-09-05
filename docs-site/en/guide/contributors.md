@@ -4,7 +4,7 @@ outline: false
 
 # Contributors
 
-PiDeck is an open-source project and everyone is welcome to contribute.
+PiStudio is an open-source project and everyone is welcome to contribute.
 
 ## Core Maintainer
 
@@ -16,7 +16,7 @@ PiDeck is an open-source project and everyone is welcome to contribute.
 
 ## How to Contribute
 
-PiDeck welcomes contributions of all kinds:
+PiStudio welcomes contributions of all kinds:
 
 - **Code** — Bug fixes, features, and improvements
 - **Documentation** — Improvements to this site and guides
@@ -26,9 +26,9 @@ PiDeck welcomes contributions of all kinds:
 
 ### Getting Started
 
-1. Fork the [repository](https://github.com/ayuayue/PiDeck)
+1. Fork the [repository](https://github.com/ayuayue/PiStudio)
 2. Create a feature branch
 3. Make your changes
 4. Submit a Pull Request
 
-Please read the [contributing guidelines](https://github.com/ayuayue/PiDeck/blob/main/CONTRIBUTING.md) before starting.
+Please read the [contributing guidelines](https://github.com/ayuayue/PiStudio/blob/main/CONTRIBUTING.md) before starting.

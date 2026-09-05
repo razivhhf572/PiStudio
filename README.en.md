@@ -1,4 +1,4 @@
-# PiDeck
+# PiStudio
 
 [中文文档](README.md) · [English](README.en.md) · [LinuxDO 友链](https://linux.do)
 
@@ -18,25 +18,25 @@
 </picture>
 <!-- star-history:end -->
 
-![PiDeck workspace overview](docs/images/readme/hero.png)
-![PiDeck workspace settings](docs/images/readme/setting.png)
+![PiStudio workspace overview](docs/images/readme/hero.png)
+![PiStudio workspace settings](docs/images/readme/setting.png)
 
 ---
 
-## What is PiDeck
+## What is PiStudio
 
-**PiDeck** is an open-source desktop workbench for pi and DSH that manages pi Agent sessions across local project folders, with import support for local Codex and Claude sessions so you can browse and restore them in one place. Built with Electron + TypeScript, it provides multi-project workspace management, AI session history, Git integration, built-in terminal, visual config management, and plugin extensions — so local AI coding assistants stay consistent, traceable, and configurable across projects.
+**PiStudio** is an open-source desktop workbench for pi and DSH that manages pi Agent sessions across local project folders, with import support for local Codex and Claude sessions so you can browse and restore them in one place. Built with Electron + TypeScript, it provides multi-project workspace management, AI session history, Git integration, built-in terminal, visual config management, and plugin extensions — so local AI coding assistants stay consistent, traceable, and configurable across projects.
 
 **Who it's for:** Developers who want to manage multiple local-project AI coding assistant sessions from a desktop app, review session history and Git status in one place, and configure pi through visual editors instead of raw JSON files.
 
-`PiDeck` is **not** a fork of pi. It is a lightweight Electron shell that orchestrates multiple `pi --mode rpc` processes, providing a native desktop UI for projects, sessions, conversations, configuration, and tool orchestration — all powered by pi's native agent capabilities, with session files read and written natively by pi. Beyond pi, PiDeck also deeply integrates the **DSH (DeepSeek Harness)** backend — see [DSH Backend](#-dsh-backend).
+`PiStudio` is **not** a fork of pi. It is a lightweight Electron shell that orchestrates multiple `pi --mode rpc` processes, providing a native desktop UI for projects, sessions, conversations, configuration, and tool orchestration — all powered by pi's native agent capabilities, with session files read and written natively by pi. Beyond pi, PiStudio also deeply integrates the **DSH (DeepSeek Harness)** backend — see [DSH Backend](#-dsh-backend).
 
 ---
 
 ## 📑 Table of Contents
 
-- [PiDeck](#pideck)
-  - [What is PiDeck](#what-is-pideck)
+- [PiStudio](#pistudio)
+  - [What is PiStudio](#what-is-pistudio)
   - [📑 Table of Contents](#-table-of-contents)
   - [✨ Highlights](#-highlights)
   - [📋 Changelog](#-changelog)
@@ -118,7 +118,7 @@
 | **Todo Bar** | A persistent agent task list above the composer — pending / in-progress / done at a glance. |
 | **Message Edit/Delete** | Copy, edit, and delete AI responses and user messages; edited text is backfilled to the composer for re-sending. |
 | **Session Management** | Create, rename, copy, export HTML, delete history, restart & reload, close agents — from the sidebar or context menus. |
-| **Session Import** | Import local Codex and Claude sessions from the project context menu, then browse or restore them as PiDeck history sessions. |
+| **Session Import** | Import local Codex and Claude sessions from the project context menu, then browse or restore them as PiStudio history sessions. |
 | **Ruler Rail** | A right-edge ruler maps timeline positions so you can jump to any message in long sessions. |
 | **Content Width Restriction** | Draggable content width slider (unlimited by default) for long code lines or compact layouts. |
 
@@ -169,7 +169,7 @@
 
 ## 🐳 DSH Backend
 
-Beyond pi, PiDeck deeply integrates **DSH (DeepSeek Harness, DeepSeek's official Agent Harness)**: pi and DSH sessions coexist under the same project and can be browsed side by side, with pi / DSH badges on session rows and headers.
+Beyond pi, PiStudio deeply integrates **DSH (DeepSeek Harness, DeepSeek's official Agent Harness)**: pi and DSH sessions coexist under the same project and can be browsed side by side, with pi / DSH badges on session rows and headers.
 
 - **Zero-port deep fusion** — the DSH host runs embedded in a utilityProcess: no `dsh web`, no listening ports, no background HTTP; lazy startup never slows app launch.
 - **Full session capabilities** — paginated history, fork (branch from an anchor with the fork-point text backfilled into the composer), `/compact` context compression; sessions restore automatically after an app restart.
@@ -185,7 +185,7 @@ Beyond pi, PiDeck deeply integrates **DSH (DeepSeek Harness, DeepSeek's official
 ## 🏗️ How It Works
 
 ```txt
-PiDeck
+PiStudio
 ├─ Electron Main Process
 │  ├─ Manages project records
 │  ├─ Spawns one pi --mode rpc process per agent session
@@ -212,7 +212,7 @@ PiDeck
    └─ Native pi sessions / tools / models / context
 ```
 
-Core design principle: **one agent session = one pi RPC process**, keeping sessions isolated and letting pi own its native behavior; PiDeck and pi communicate only over stdio JSON-RPC. The DSH backend runs embedded in a utilityProcess and likewise introduces no extra network ports.
+Core design principle: **one agent session = one pi RPC process**, keeping sessions isolated and letting pi own its native behavior; PiStudio and pi communicate only over stdio JSON-RPC. The DSH backend runs embedded in a utilityProcess and likewise introduces no extra network ports.
 
 ---
 
@@ -220,9 +220,9 @@ Core design principle: **one agent session = one pi RPC process**, keeping sessi
 
 Prebuilt packages for **Windows**, **macOS**, and **Linux** are published on GitHub Releases:
 
-👉 **[GitHub Releases](https://github.com/ayuayue/PiDeck/releases)**
+👉 **[GitHub Releases](https://github.com/ayuayue/PiStudio/releases)**
 
-> PiDeck requires the `pi` CLI to be installed separately and available in your system `PATH`.
+> PiStudio requires the `pi` CLI to be installed separately and available in your system `PATH`.
 
 Requirements:
 
@@ -241,8 +241,8 @@ pi --mode rpc
 ## 🧰 Quick Start (from Source)
 
 ```bash
-git clone https://github.com/ayuayue/PiDeck.git
-cd PiDeck
+git clone https://github.com/ayuayue/PiStudio.git
+cd PiStudio
 npm install
 npm run make-icon
 npm run dev
@@ -254,21 +254,21 @@ Requirements: Node.js 20+, npm.
 
 ## ❓ FAQ
 
-**Q: What is the relationship between PiDeck and pi? Does PiDeck modify my session files?**
+**Q: What is the relationship between PiStudio and pi? Does PiStudio modify my session files?**
 
-A: PiDeck is a desktop shell for pi (not a fork): agent behavior, tool calls, session I/O, and model calls are all handled natively by pi, while PiDeck takes care of the "framework" layer — window management, process lifecycle, session browsing, the Git panel, terminal, and settings — communicating over stdio JSON-RPC only. pi / DSH sessions are still read and written natively by their own backends, and PiDeck never changes the original session format. Imported Codex / Claude sessions become PiDeck history copies and leave the original files untouched.
+A: PiStudio is a desktop shell for pi (not a fork): agent behavior, tool calls, session I/O, and model calls are all handled natively by pi, while PiStudio takes care of the "framework" layer — window management, process lifecycle, session browsing, the Git panel, terminal, and settings — communicating over stdio JSON-RPC only. pi / DSH sessions are still read and written natively by their own backends, and PiStudio never changes the original session format. Imported Codex / Claude sessions become PiStudio history copies and leave the original files untouched.
 
-**Q: PiDeck says it cannot find pi on startup?**
+**Q: PiStudio says it cannot find pi on startup?**
 
-A: PiDeck relies on the `pi` command being available in your system `PATH`. Run `pi --version` in a terminal first; if it is not available, install the pi CLI and configure a provider / API key before starting PiDeck.
+A: PiStudio relies on the `pi` command being available in your system `PATH`. Run `pi --version` in a terminal first; if it is not available, install the pi CLI and configure a provider / API key before starting PiStudio.
 
 **Q: Which models are supported? Where do I configure them?**
 
-A: Model capabilities are entirely determined by pi's configuration. PiDeck ships visual editors for `models.json` / `auth.json` / `settings.json` with connection tests; the DSH backend uses DeepSeek models, and Image Generation mode uses separately configured image providers (OpenAI / Volcengine / SiliconFlow, etc.).
+A: Model capabilities are entirely determined by pi's configuration. PiStudio ships visual editors for `models.json` / `auth.json` / `settings.json` with connection tests; the DSH backend uses DeepSeek models, and Image Generation mode uses separately configured image providers (OpenAI / Volcengine / SiliconFlow, etc.).
 
 **Q: What is DSH? How do I enable it?**
 
-A: DSH (DeepSeek Harness) is DeepSeek's official Agent Harness, deeply integrated by PiDeck — see the [DSH Backend](#-dsh-backend) section for the capability list. Finish configuration in the DSH tab of Settings, then choose the DSH backend when creating a session.
+A: DSH (DeepSeek Harness) is DeepSeek's official Agent Harness, deeply integrated by PiStudio — see the [DSH Backend](#-dsh-backend) section for the capability list. Finish configuration in the DSH tab of Settings, then choose the DSH backend when creating a session.
 
 **Q: Does it collect my data?**
 
@@ -276,7 +276,7 @@ A: The app sends an anonymous, low-frequency `app_heartbeat` usage statistic by 
 
 **Q: How do I report issues?**
 
-A: Join the QQ group at the bottom of this page, or file an issue on [GitHub Issues](https://github.com/ayuayue/PiDeck/issues); you can export logs from Settings when troubleshooting.
+A: Join the QQ group at the bottom of this page, or file an issue on [GitHub Issues](https://github.com/ayuayue/PiStudio/issues); you can export logs from Settings when troubleshooting.
 
 ---
 
@@ -344,13 +344,13 @@ All kinds of contributions are welcome: bug reports, feature ideas, documentatio
 - Please search for existing issues before filing a new one;
 - Code PRs should follow the repo's architecture conventions and commit guidelines — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Thank you to everyone who has contributed to PiDeck! See the full list in [CONTRIBUTORS.en.md](CONTRIBUTORS.en.md).
+Thank you to everyone who has contributed to PiStudio! See the full list in [CONTRIBUTORS.en.md](CONTRIBUTORS.en.md).
 
 ---
 
 ## 💬 Community
 
-Join the PiDeck QQ group for discussion and feedback:
+Join the PiStudio QQ group for discussion and feedback:
 
 **1026218644**
 
@@ -364,7 +364,7 @@ This app starts local `pi` processes and exposes limited file operations through
 
 ## ☕ Sponsor
 
-If PiDeck is useful to you, you can buy the author a coffee. Scan the WeChat Pay QR code below to tip. Thank you.
+If PiStudio is useful to you, you can buy the author a coffee. Scan the WeChat Pay QR code below to tip. Thank you.
 
 <p align="center">
   <img src="docs/images/wechat_pay.png" alt="WeChat Pay tip QR code" width="280" />

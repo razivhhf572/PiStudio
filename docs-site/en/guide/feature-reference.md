@@ -1,6 +1,6 @@
 # Feature Reference
 
-> This handbook walks through every feature of PiDeck by UI area: where each button, menu, context menu, and shortcut lives, how to use it, and what it does.
+> This handbook walks through every feature of PiStudio by UI area: where each button, menu, context menu, and shortcut lives, how to use it, and what it does.
 > New here? Start with the [Usage Guide](/en/guide/usage-guide). For settings details see [Settings & Skills](/en/guide/settings). Stuck on something? See [Troubleshooting](/en/guide/troubleshooting).
 
 ## Interface Map
@@ -254,7 +254,7 @@ Triggered by `⑂` on a queued message. It:
 ### Browser panel
 
 - **Address bar**: Enter navigates; missing protocol gets `https://` prepended.
-- **Tabs**: `+` new (defaults to the PiDeck home page), click to switch, `×` to close; tab state survives drawer/fullscreen toggles.
+- **Tabs**: `+` new (defaults to the PiStudio home page), click to switch, `×` to close; tab state survives drawer/fullscreen toggles.
 - **Navigation**: back / forward / refresh / home.
 - **Device presets**: PC / iPhone (mobile UA) / iPad (tablet UA) — switches UA and constrains the viewport.
 - **Fullscreen**: maximize in the header; click blank space to leave; while fullscreen you can minimize back or close.

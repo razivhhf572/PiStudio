@@ -1,7 +1,7 @@
 {
-  "name": "pi-desktop",
+  "name": "pi-studio",
   "version": "0.7.4-beta",
-  "description": "PiDeck is an open-source desktop workbench to manage multiple pi AI coding agents across local project folders with session history, Git integration, terminal, and config management.",
+  "description": "PiStudio is an open-source desktop workbench to manage multiple pi AI coding agents across local project folders with session history, Git integration, terminal, and config management.",
   "private": true,
   "license": "MIT",
   "author": {
@@ -14,13 +14,13 @@
       "url": "https://github.com/1900EasonJin"
     }
   ],
-  "homepage": "https://github.com/ayuayue/PiDeck#readme",
+  "homepage": "https://github.com/ayuayue/PiStudio#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ayuayue/PiDeck.git"
+    "url": "git+https://github.com/ayuayue/PiStudio.git"
   },
   "bugs": {
-    "url": "https://github.com/ayuayue/PiDeck/issues"
+    "url": "https://github.com/ayuayue/PiStudio/issues"
   },
   "keywords": [
     "pi",
@@ -96,13 +96,13 @@
     "undici": "^6.28.0"
   },
   "build": {
-    "appId": "com.ayuayue.pi-desktop",
-    "productName": "PiDeck",
+    "appId": "com.ayuayue.pi-studio",
+    "productName": "PiStudio",
     "protocols": [
       {
-        "name": "PiDeck Agent Link",
+        "name": "PiStudio Agent Link",
         "schemes": [
-          "pideck"
+          "pistudio"
         ]
       }
     ],
@@ -222,7 +222,7 @@
     "publish": {
       "provider": "github",
       "owner": "ayuayue",
-      "repo": "PiDeck"
+      "repo": "PiStudio"
     }
   },
   "devDependencies": {
