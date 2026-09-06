@@ -252,7 +252,23 @@ async function main() {
       }
     }
   } catch { /* 跳过恢复 */ }
+  // 用户级 MCP patch 层（与 hostEntry 同款）：mcp-manager 写的 web/cordis.patch.yml
+  // 是 patch 操作数组，解析 insert 行生成 loader entry（name 经 require 解析成绝对路径）。
   const webPatchPath = join(dshHome, "profiles", "web", "cordis.patch.yml");
+  const mcpPatchEntries = [];
+  if (existsSync(webPatchPath)) {
+    try {
+      const rows = yaml.load(readFileSync(webPatchPath, "utf8"));
+      for (const row of Array.isArray(rows) ? rows : []) {
+        for (const item of Array.isArray(row?.insert) ? row.insert : []) {
+          if (typeof item?.id !== "string" || typeof item?.name !== "string") continue;
+          // name 保留裸名（mcp-manager 的 list 按裸名过滤条目；dsh-mcp-client 在 runtime 锚可解析）
+          try { require.resolve(item.name); } catch { continue; }
+          mcpPatchEntries.push({ id: item.id, name: item.name, ...(item.config !== undefined ? { config: item.config } : {}) });
+        }
+      }
+    } catch { /* 文件损坏跳过 */ }
+  }
   patches.push({
     insert: [
       { id: "storage", name: "@deepseek-ai/dsh-storage" },
@@ -268,7 +284,7 @@ async function main() {
       // 方案 B：connection stub + 已装 bundle 恢复 + 用户 MCP patch 层。
       { id: "pideck-connection-stub", name: join(configDir, "pideck-connection-stub.js") },
       ...bundleIncludes,
-      ...(existsSync(webPatchPath) ? [{ id: "user-mcp-patch", name: "cordis:include", config: { path: pathToFileURL(webPatchPath).href } }] : []),
+      ...mcpPatchEntries,
     ],
   });
   log("compose", `patches=${patches.length} 条（含 dshmarket + webserver/connection stub + ${bundleIncludes.length} bundles）`);

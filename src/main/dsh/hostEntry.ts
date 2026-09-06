@@ -124,9 +124,38 @@ async function main(): Promise<void> {
 		patches.push(row);
 	}
 	// 方案 B：用户级 MCP patch 层——dsh-mcp-manager 默认读写
-	// $DSH_HOME/profiles/web/cordis.patch.yml（写死 web profile），本 host 在
-	// insert 数组里 include 它（存在时），其管理的 MCP server 条目对 PiStudio 生效。
+	// $DSH_HOME/profiles/web/cordis.patch.yml（写死 web profile）。该文件是
+	// patch 操作数组（- insert: [...]），cordis:include 只接受 loader entries——
+	// 直接解析 insert 行生成 loader entry（name 经 runtime 锚解析成绝对路径，
+	// config 原样带）；文件损坏/条目解析失败时跳过该条，不阻断启动。
 	const webPatchPath = join(dshHome, "profiles", "web", "cordis.patch.yml");
+	const mcpPatchEntries: Array<{ id: string; name: string; config?: Record<string, unknown> }> = [];
+	if (existsSync(webPatchPath)) {
+		try {
+			const rows = appRequire("js-yaml").load(readFileSync(webPatchPath, "utf8")) as Array<{ insert?: Array<{ id?: unknown; name?: unknown; config?: Record<string, unknown> }> }> | null;
+			for (const row of Array.isArray(rows) ? rows : []) {
+				for (const item of Array.isArray(row?.insert) ? row.insert : []) {
+					if (typeof item?.id !== "string" || typeof item?.name !== "string") continue;
+					// name 保留裸名：dsh-mcp-client 在 runtime node_modules，Loader 按
+					// nodeModulesUrl（runtime 锚）解析 ✓；mcp-manager 的 list 按
+					// entry.options.name === '@deepseek-ai/dsh-mcp-client' 过滤，
+					// 用绝对路径会导致列表恒空。解析不到的条目跳过。
+					try {
+						require.resolve(item.name);
+					} catch {
+						continue;
+					}
+					mcpPatchEntries.push({
+						id: item.id,
+						name: item.name,
+						...(item.config !== undefined ? { config: item.config } : {}),
+					});
+				}
+			}
+		} catch {
+			// 文件损坏：跳过用户 MCP 层，host 照常启动
+		}
+	}
 	// 方案 A/B 补足：恢复已装插件——dshmarket 把 bundle 持久化在 profile
 	// package.json 的 dsh.profile.bundles + 各包 dsh.bundle.patch（patch 内容是
 	// `- insert: [{id, name}]` 操作）。host 启动时把每个 bundle 的 insert 行
@@ -151,7 +180,7 @@ async function main(): Promise<void> {
 					if (typeof patchRel !== "string" || !patchRel) continue;
 					const patchPath = join(pkgDir, patchRel);
 					if (!existsSync(patchPath)) continue;
-					const rows = require("js-yaml").load(readFileSync(patchPath, "utf8")) as Array<{ insert?: Array<{ id?: unknown; name?: unknown; config?: Record<string, unknown> }> }> | null;
+					const rows = appRequire("js-yaml").load(readFileSync(patchPath, "utf8")) as Array<{ insert?: Array<{ id?: unknown; name?: unknown; config?: Record<string, unknown> }> }> | null;
 					for (const row of Array.isArray(rows) ? rows : []) {
 						for (const item of Array.isArray(row?.insert) ? row.insert : []) {
 							if (typeof item?.id !== "string" || typeof item?.name !== "string") continue;
@@ -258,10 +287,8 @@ async function main(): Promise<void> {
 			{ id: "pideck-connection-stub", name: join(configDir, "pideck-connection-stub.js") },
 			// 恢复已装插件（方案 A/B）：dshmarket 持久化的 profile bundles。
 			...bundleIncludes,
-			// 用户级 MCP patch 层（方案 B）：dsh-mcp-manager 默认读写
-			// $DSH_HOME/profiles/web/cordis.patch.yml（写死 web profile）——本 host
-			// include 该文件（存在时），其管理的 MCP server 条目对 PiStudio 生效。
-			...(existsSync(webPatchPath) ? [{ id: "user-mcp-patch", name: "cordis:include", config: { path: pathToFileURL(webPatchPath).href } }] : []),
+			// 用户级 MCP patch 层（方案 B）：mcp-manager 管理的 MCP server 条目。
+			...mcpPatchEntries,
 		],
 	});
 
