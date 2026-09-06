@@ -101,6 +101,10 @@ async function main(): Promise<void> {
 	// node_modules），找不到 app 根 node_modules → ERR_MODULE_NOT_FOUND → exit(1)。
 	// 必须先用 createRequire 解析出真实文件路径，再按 file URL 动态 import。
 	const require = createRequire(join(fileURLToPath(nodeModulesUrl), "package.json"));
+	// dshmarket 只随 app 分发（打包进 app.asar/node_modules），runtime node_modules
+	// 没有它（dist-runtime 是 @deepseek-ai/* 生态，不含市场）——必须用 app 侧锚解析。
+	// hostEntry 打包产物在 app.asar/out/main/，app node_modules = 上两级。
+	const appRequire = createRequire(join(__dirname, "../../node_modules/package.json"));
 	const importFromApp = (specifier: string) =>
 		import(pathToFileURL(require.resolve(specifier)).href);
 	const [{ boot, loadOverlayPatches }, { toFetchHandler }, { provideCmdline }] = await Promise.all([
@@ -246,7 +250,7 @@ async function main(): Promise<void> {
 			{ id: "pideck-webserver-stub", name: join(configDir, "pideck-webserver-stub.js") },
 			{
 				id: "dsh-market",
-				name: require.resolve("dshmarket"),
+				name: appRequire.resolve("dshmarket"),
 				config: { profile: "pistudio", allowRestart: false },
 			},
 			// connection stub（方案 B）：headless host 无 dsh-client-connection，
