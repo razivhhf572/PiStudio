@@ -274,6 +274,16 @@ export type DshBackendIpcDeps = {
 	marketStatus?: () => Promise<unknown>;
 	/** connection RPC（方案 B）：调社区插件 rpc.handle 通道；未装配时抛错。 */
 	mcpRpc?: (input: import("../../shared/types").DshMcpRpcInput) => Promise<unknown>;
+	/** DSH 技能清单（用户级 ~/.dsh/skills）；未装配时返回空。 */
+	skillList?: () => import("../../shared/types").DshSkillSummary[];
+	/** DSH 技能全文读取；未装配时抛错。 */
+	skillRead?: (name: string) => import("../../shared/types").DshSkillDetail | null;
+	/** DSH 技能新建；未装配时抛错。 */
+	skillCreate?: (input: import("../../shared/types").DshSkillUpsertInput) => void;
+	/** DSH 技能更新；未装配时抛错。 */
+	skillUpdate?: (name: string, input: import("../../shared/types").DshSkillUpsertInput) => void;
+	/** DSH 技能删除；未装配时抛错。 */
+	skillDelete?: (name: string) => void;
 	/** DSH 动态插件卸载（undefine）；未装配时抛错。 */
 	uninstallDshPlugin?: (input: import("../../shared/types").DshPluginLifecycleInput) => Promise<unknown>;
 	/** 判断 agentId 是否属于 DSH 后端（fork 等 pi 专属命令按 backend 分流）。 */
@@ -458,6 +468,11 @@ export function registerSessionIpc(deps: SessionIpcDeps): void {
 		marketUninstall,
 		marketStatus,
 		mcpRpc,
+		skillList,
+		skillRead,
+		skillCreate,
+		skillUpdate,
+		skillDelete,
 		isDshAgent = () => false,
 		forkDshAgentSession,
 		cloneDshAgentSession,
@@ -1449,6 +1464,54 @@ ipcMain.handle(
 		}
 		if (!mcpRpc) throw new Error("DSH mcp rpc is not available");
 		return mcpRpc(input as import("../../shared/types").DshMcpRpcInput);
+	},
+);
+// DSH 技能管理（用户级 ~/.dsh/skills 的 SKILL.md CRUD）。
+ipcMain.handle(
+	ipcChannels.dshSkillList,
+	async (): Promise<import("../../shared/types").DshSkillSummary[]> => {
+		if (!skillList) return [];
+		return skillList();
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshSkillRead,
+	async (_event, name: unknown): Promise<import("../../shared/types").DshSkillDetail | null> => {
+		if (typeof name !== "string" || !name) throw new Error("invalid skill name");
+		if (!skillRead) throw new Error("DSH skill read is not available");
+		return skillRead(name);
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshSkillCreate,
+	async (_event, input: unknown): Promise<void> => {
+		if (typeof input !== "object" || input === null) throw new Error("invalid skill payload");
+		const record = input as Record<string, unknown>;
+		if (typeof record.name !== "string" || !record.name || typeof record.description !== "string" || !record.description.trim() || typeof record.content !== "string") {
+			throw new Error("invalid skill payload");
+		}
+		if (!skillCreate) throw new Error("DSH skill create is not available");
+		skillCreate(input as import("../../shared/types").DshSkillUpsertInput);
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshSkillUpdate,
+	async (_event, name: unknown, input: unknown): Promise<void> => {
+		if (typeof name !== "string" || !name || typeof input !== "object" || input === null) throw new Error("invalid skill payload");
+		const record = input as Record<string, unknown>;
+		if (typeof record.name !== "string" || !record.name || typeof record.description !== "string" || !record.description.trim() || typeof record.content !== "string") {
+			throw new Error("invalid skill payload");
+		}
+		if (!skillUpdate) throw new Error("DSH skill update is not available");
+		skillUpdate(name, input as import("../../shared/types").DshSkillUpsertInput);
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshSkillDelete,
+	async (_event, name: unknown): Promise<void> => {
+		if (typeof name !== "string" || !name) throw new Error("invalid skill name");
+		if (!skillDelete) throw new Error("DSH skill delete is not available");
+		skillDelete(name);
 	},
 );
 ipcMain.handle(

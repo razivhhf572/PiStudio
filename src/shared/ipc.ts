@@ -190,6 +190,16 @@ export const ipcChannels = {
 	dshMarketStatus: "dsh:market-status",
 	/** connection RPC（方案 B）：调社区插件 rpc.handle 通道（如 /mcp-manager）。 */
 	dshMcpRpc: "dsh:mcp-rpc",
+	/** DSH 技能清单（用户级 ~/.dsh/skills）。 */
+	dshSkillList: "dsh:skill-list",
+	/** DSH 技能全文读取。 */
+	dshSkillRead: "dsh:skill-read",
+	/** DSH 技能新建。 */
+	dshSkillCreate: "dsh:skill-create",
+	/** DSH 技能更新。 */
+	dshSkillUpdate: "dsh:skill-update",
+	/** DSH 技能删除。 */
+	dshSkillDelete: "dsh:skill-delete",
 	/** DSH host 级模型目录（llm.models），不依赖已启动的会话。 */
 	dshListModels: "dsh:list-models",
 	/** DSH 配置页模型发现（llm.discoverModels；只返回候选，不写配置）。 */

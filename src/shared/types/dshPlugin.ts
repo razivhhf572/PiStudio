@@ -181,3 +181,30 @@ export type DshMcpRpcInput = {
 	endpoint: string;
 	payload?: unknown;
 };
+
+/**
+ * DSH 技能管理契约（用户级 ~/.dsh/skills/ 的 SKILL.md CRUD）。
+ * host 侧 chokidar 监听目录，写文件即生效（composer /name 立即可用）。
+ */
+
+/** 技能摘要（列表行）。 */
+export type DshSkillSummary = {
+	name: string;
+	description: string;
+	whenToUse?: string;
+	/** SKILL.md 绝对路径。 */
+	path: string;
+};
+
+/** 技能全文（编辑用）。 */
+export type DshSkillDetail = DshSkillSummary & {
+	content: string;
+};
+
+/** 新建/更新入参（name 需匹配 kebab-case：a-z0-9 和连字符）。 */
+export type DshSkillUpsertInput = {
+	name: string;
+	description: string;
+	whenToUse?: string;
+	content: string;
+};

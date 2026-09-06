@@ -697,6 +697,21 @@ const api = {
 		/** connection RPC（方案 B）：调社区插件 rpc.handle 通道（如 /mcp-manager）。 */
 		mcpRpc: (input: import("../shared/types").DshMcpRpcInput) =>
 			ipcRenderer.invoke(ipcChannels.dshMcpRpc, input) as Promise<unknown>,
+		/** DSH 技能清单（用户级 ~/.dsh/skills）。 */
+		skillList: () =>
+			ipcRenderer.invoke(ipcChannels.dshSkillList) as Promise<import("../shared/types").DshSkillSummary[]>,
+		/** DSH 技能全文读取。 */
+		skillRead: (name: string) =>
+			ipcRenderer.invoke(ipcChannels.dshSkillRead, name) as Promise<import("../shared/types").DshSkillDetail | null>,
+		/** DSH 技能新建。 */
+		skillCreate: (input: import("../shared/types").DshSkillUpsertInput) =>
+			ipcRenderer.invoke(ipcChannels.dshSkillCreate, input) as Promise<void>,
+		/** DSH 技能更新。 */
+		skillUpdate: (name: string, input: import("../shared/types").DshSkillUpsertInput) =>
+			ipcRenderer.invoke(ipcChannels.dshSkillUpdate, name, input) as Promise<void>,
+		/** DSH 技能删除。 */
+		skillDelete: (name: string) =>
+			ipcRenderer.invoke(ipcChannels.dshSkillDelete, name) as Promise<void>,
 		sendPrompt: (input: SendSessionPromptInput) =>
 			ipcRenderer.invoke(ipcChannels.sessionsSendPrompt, input) as Promise<SendSessionPromptResult>,
 		sendUiResponse: (input: SessionUiResponseInput) =>

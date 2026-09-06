@@ -239,6 +239,7 @@ import { PiModelCapabilityCache, watchPiConfigDirectory } from "./pi/PiModelCapa
 import { isDefaultAgentTitle } from "./pi/agentUtils";
 import { CompositeAgentGateway } from "./agents/CompositeAgentGateway";
 import { DshHost, resolveDshHomeDir } from "./dsh/DshHost";
+import { DshSkillManager } from "./dsh/dshSkillManager";
 import { DshRuntimeStatusService } from "./dsh/runtime/DshRuntimeStatus";
 import {
 	DshRuntimeManager,
@@ -403,6 +404,8 @@ let agentManager: AgentManager;
 let piModelCapabilityCache: PiModelCapabilityCache | undefined;
 /** DSH 深融合宿主与后端网关；窗口创建后后台预热，发送链路仍可按需兜底。 */
 let dshHost: DshHost;
+/** DSH 技能管理（用户级 ~/.dsh/skills 的 SKILL.md CRUD，独立于 host 进程）。 */
+let dshSkillManager: DshSkillManager;
 /** DSH runtime 安装态服务（AgentRuntimeProvider 阶段 1）：installed 门控 UI/新建会话。 */
 let dshRuntimeStatus: DshRuntimeStatusService;
 /** DSH runtime 生命周期管理（阶段 2）：外部 runtime 的扫描/下载/安装/回收。 */
@@ -2652,6 +2655,12 @@ function registerIpc() {
 			marketStatus: () => dshHost.marketFetch("/dsh-market/status"),
 			// connection RPC（方案 B）：调社区插件 rpc.handle 通道（如 mcp-manager）。
 			mcpRpc: (input) => dshHost.mcpRpc(input.channel, input.endpoint, input.payload),
+			// DSH 技能管理（用户级 ~/.dsh/skills 的 SKILL.md CRUD）。
+			skillList: () => dshSkillManager.list(),
+			skillRead: (name) => dshSkillManager.read(name),
+			skillCreate: (input) => dshSkillManager.create(input),
+			skillUpdate: (name, input) => dshSkillManager.update(name, input),
+			skillDelete: (name) => dshSkillManager.remove(name),
 			isDshAgent: (agentId) =>
 				dshAgentManager?.list().some((tab) => tab.id === agentId) === true,
 			forkDshAgentSession: async (target, entryId) => {
@@ -3244,6 +3253,7 @@ app.whenReady().then(async () => {
 	// DSH host 实例先装配；是否后台预热看 defaultAgentBackend（见 createWindow 后）。
 	// 发送/历史/配置链路仍走 ensureStarted 幂等兜底，不用 DSH 的用户不常驻 host。
 	// DSH_HOME 可用设置 dshHomeDir 覆盖（用户自己的 ~/.dsh 等），空串 = 应用私有目录。
+	dshSkillManager = new DshSkillManager(() => resolveDshHomeDir(settingsStore.get().dshHomeDir ?? "", app.getPath("userData")));
 	dshHost = new DshHost(
 		() => app.getPath("userData"),
 		() => app.getAppPath(),

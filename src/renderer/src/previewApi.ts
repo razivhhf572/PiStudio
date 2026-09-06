@@ -484,6 +484,11 @@ export function createPreviewApi(): PiDesktopApi {
 			mcpRpc: async () => {
 				throw new Error("preview mode: mcp rpc is not available");
 			},
+			skillList: async (): Promise<import("../../shared/types").DshSkillSummary[]> => [],
+			skillRead: async () => null,
+			skillCreate: async () => {},
+			skillUpdate: async () => {},
+			skillDelete: async () => {},
 			listCatalog: async (projectId, _options?: { scan?: boolean }): Promise<SessionRecord[]> => getSessions().map((session) => ({
 				id: `preview-record:${session.id}`,
 				projectId,

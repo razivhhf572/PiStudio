@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useMemo
 import { useAtomValue } from "jotai";
 import {
 ArchiveRestore,
+BookOpen,
 Cable,
 ChevronDown,
 Cpu,
@@ -38,6 +39,7 @@ import { isDshPluginNamespace, dshPluginNamespaceTitleKey, dshPluginNamespaceDes
 import { DshPluginSection, PluginInventoryView } from "./DshPluginSection";
 import { PluginMarketView } from "./DshPluginMarket";
 import { DshMcpPanel } from "./DshMcpPanel";
+import { DshSkillPanel } from "./DshSkillPanel";
 import { DeepseekRouteCard, PiAiProvidersCard } from "./DshProviderCards";
 import { collectCredentialRefsWithValue, normalizeDshSchema, type DshSectionApi } from "./dshSchema";
 import { presetDisplayDescription, presetDisplayName } from "./dshPresetDisplay";
@@ -77,6 +79,7 @@ const NAV_ITEMS: Array<{ id: string; labelKey: TranslationKey; icon: ReactNode }
 	{ id: "presets", labelKey: "config.dsh.tab.presets", icon: <AgentPresetLogo className="size-3.5" aria-hidden="true" /> },
 	{ id: "plugins", labelKey: "config.dsh.tab.plugins", icon: <Puzzle className="size-3.5" aria-hidden="true" /> },
 	{ id: "mcp", labelKey: "config.dsh.tab.mcp", icon: <Cable className="size-3.5" aria-hidden="true" /> },
+	{ id: "skills", labelKey: "config.dsh.tab.skills", icon: <BookOpen className="size-3.5" aria-hidden="true" /> },
 { id: "security", labelKey: "config.dsh.tab.security", icon: <ShieldCheck className="size-3.5" aria-hidden="true" /> },
 { id: "raw", labelKey: "config.dsh.tab.raw", icon: <FileCode2 className="size-3.5" aria-hidden="true" /> },
 ];
@@ -583,6 +586,12 @@ export const DshConfigTab = forwardRef<DshConfigTabHandle, {
 						<div hidden={activeTab !== "mcp"}>
 							<div className="p-4">
 								<DshMcpPanel />
+							</div>
+						</div>
+						{/* DSH 技能管理（用户级 ~/.dsh/skills 的 SKILL.md CRUD） */}
+						<div hidden={activeTab !== "skills"}>
+							<div className="p-4">
+								<DshSkillPanel />
 							</div>
 						</div>
 						<div hidden={activeTab !== "raw"} className="flex min-h-0 flex-1 flex-col">
