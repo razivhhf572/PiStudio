@@ -96,7 +96,10 @@
     "tar": "^7.5.15",
     "undici": "^6.28.0",
     "dshmarket": "^1.44.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-settings": "^0.1.1-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.1"
   },
   "build": {
     "appId": "com.ayuayue.pi-studio",
