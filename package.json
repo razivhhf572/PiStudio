@@ -94,7 +94,9 @@
     "node-pty": "^1.1.0",
     "sql.js": "^1.14.1",
     "tar": "^7.5.15",
-    "undici": "^6.28.0"
+    "undici": "^6.28.0",
+    "dshmarket": "^1.44.0",
+    "js-yaml": "^4.1.0"
   },
   "build": {
     "appId": "com.ayuayue.pi-studio",
@@ -303,7 +305,6 @@
     "cmdk": "^1.1.1",
     "dsh-bill": "^0.13.1",
     "dsh-tool-pwsh-persistent": "file:packages/dsh-tool-pwsh-persistent",
-    "dshmarket": "^1.44.0",
     "electron": "^43.4.0",
     "electron-builder": "^26.8.1",
     "electron-vite": "^4.0.0",
