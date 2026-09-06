@@ -465,6 +465,22 @@ export function createPreviewApi(): PiDesktopApi {
 			runDshPlugin: async () => undefined,
 			stopDshPlugin: async () => undefined,
 			uninstallDshPlugin: async () => undefined,
+			// 预览模式无 DSH host：市场 API 抛「不可用」（调用方按异常处理）
+			marketCatalog: async () => {
+				throw new Error("preview mode: market is not available");
+			},
+			marketInstalled: async () => {
+				throw new Error("preview mode: market is not available");
+			},
+			marketInstall: async () => {
+				throw new Error("preview mode: market is not available");
+			},
+			marketUninstall: async () => {
+				throw new Error("preview mode: market is not available");
+			},
+			marketStatus: async () => {
+				throw new Error("preview mode: market is not available");
+			},
 			listCatalog: async (projectId, _options?: { scan?: boolean }): Promise<SessionRecord[]> => getSessions().map((session) => ({
 				id: `preview-record:${session.id}`,
 				projectId,

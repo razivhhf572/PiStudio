@@ -679,6 +679,21 @@ const api = {
 		/** DSH 动态插件卸载（undefine：删除插件与全部包版本）。 */
 		uninstallDshPlugin: (input: import("../shared/types").DshPluginLifecycleInput) =>
 			ipcRenderer.invoke(ipcChannels.dshPluginUninstall, input) as Promise<unknown>,
+		/** dshmarket 市场目录（方案 A：curated registry 快照）。 */
+		marketCatalog: () =>
+			ipcRenderer.invoke(ipcChannels.dshMarketCatalog) as Promise<import("../shared/types").DshMarketCatalog>,
+		/** dshmarket 已装插件清单。 */
+		marketInstalled: () =>
+			ipcRenderer.invoke(ipcChannels.dshMarketInstalled) as Promise<import("../shared/types").DshMarketInstalled>,
+		/** dshmarket 安装（url 必须在 curated registry 内）。 */
+		marketInstall: (url: string) =>
+			ipcRenderer.invoke(ipcChannels.dshMarketInstall, url) as Promise<import("../shared/types").DshMarketMutationResult>,
+		/** dshmarket 卸载（按插件名）。 */
+		marketUninstall: (name: string) =>
+			ipcRenderer.invoke(ipcChannels.dshMarketUninstall, name) as Promise<import("../shared/types").DshMarketMutationResult>,
+		/** dshmarket 安装/更新进度状态。 */
+		marketStatus: () =>
+			ipcRenderer.invoke(ipcChannels.dshMarketStatus) as Promise<import("../shared/types").DshMarketStatus>,
 		sendPrompt: (input: SendSessionPromptInput) =>
 			ipcRenderer.invoke(ipcChannels.sessionsSendPrompt, input) as Promise<SendSessionPromptResult>,
 		sendUiResponse: (input: SessionUiResponseInput) =>

@@ -2644,6 +2644,12 @@ function registerIpc() {
 			runDshPlugin: (input) => dshHost.runDynamicPlugin(input),
 			stopDshPlugin: (input) => dshHost.stopDynamicPlugin(input),
 			uninstallDshPlugin: (input) => dshHost.uninstallDynamicPlugin(input),
+			// dshmarket 市场（方案 A）：经 fetch 桥打 /dsh-market/* 路由。
+			marketCatalog: () => dshHost.marketFetch("/dsh-market/registry"),
+			marketInstalled: () => dshHost.marketFetch("/dsh-market/installed"),
+			marketInstall: (url) => dshHost.marketFetch("/dsh-market/install", { method: "POST", body: { url } }),
+			marketUninstall: (name) => dshHost.marketFetch("/dsh-market/uninstall", { method: "POST", body: { name } }),
+			marketStatus: () => dshHost.marketFetch("/dsh-market/status"),
 			isDshAgent: (agentId) =>
 				dshAgentManager?.list().some((tab) => tab.id === agentId) === true,
 			forkDshAgentSession: async (target, entryId) => {
