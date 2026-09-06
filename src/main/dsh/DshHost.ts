@@ -505,6 +505,39 @@ export class DshHost {
 	}
 
 	/**
+	 * connection RPC 调用（方案 B）：调社区插件经 ctx.connection.rpc.handle
+	 * 注册的通道（如 dsh-mcp-manager 的 /mcp-manager）。信封契约对齐
+	 * dsh-client-connection：POST /<channel>/<endpoint>，body { rpcId, method, payload }，
+	 * 响应 { type, rpcId, result }；result.ok === false 时抛 error 文本。
+	 */
+	async mcpRpc(channel: string, endpoint: string, payload: unknown): Promise<unknown> {
+		await this.ensureStarted();
+		if (!this.apiClient) throw new Error("DSH host is not started");
+		if (!channel.startsWith("/") || !endpoint) throw new Error("invalid mcp rpc channel/endpoint");
+		const response = await this.apiClient.rawFetch(`${channel}/${endpoint}`, {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ rpcId: `pistudio-${Date.now()}`, method: endpoint, payload }),
+			timeoutMs: 30_000,
+		});
+		const text = await response.text();
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(text);
+		} catch {
+			throw new Error(`mcp rpc returned non-JSON response (HTTP ${response.status})`);
+		}
+		if (response.status >= 400) {
+			throw new Error(`mcp rpc failed (HTTP ${response.status})`);
+		}
+		const envelope = parsed as { result?: { ok?: boolean; error?: { message?: string } } };
+		if (envelope.result && envelope.result.ok === false) {
+			throw new Error(envelope.result.error?.message ?? "mcp rpc failed");
+		}
+		return envelope.result;
+	}
+
+	/**
 	 * dshmarket 市场调用（方案 A）：经 fetch 桥打 /dsh-market/* 路由。
 	 * hostEntry 的 handler 把 /dsh-market/ 前缀转发给 webServer stub 的 dispatch
 	 * （同源 host/origin 头由 stub 补齐）。HTTP >= 400 时抛 error 文本。

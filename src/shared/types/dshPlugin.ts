@@ -155,3 +155,29 @@ export type DshMarketStatus = {
 	busy: boolean;
 	pnpm: boolean;
 };
+
+/**
+ * MCP 服务器条目（方案 B：dsh-mcp-manager 的 /mcp-manager list 返回）。
+ * 渲染层面板直接消费该形状。
+ */
+export type DshMcpServer = {
+	id: string;
+	serverName: string;
+	transport: "stdio" | "streamable-http";
+	url?: string;
+	command?: string;
+	args?: string[];
+	env?: Record<string, string>;
+	cwd?: string;
+	enabled: boolean;
+	fiberPhase?: string | null;
+	toolCount: number;
+	userManaged: boolean;
+};
+
+/** MCP RPC 入参（方案 B：channel + endpoint + payload）。 */
+export type DshMcpRpcInput = {
+	channel: string;
+	endpoint: string;
+	payload?: unknown;
+};

@@ -2650,6 +2650,8 @@ function registerIpc() {
 			marketInstall: (url) => dshHost.marketFetch("/dsh-market/install", { method: "POST", body: { url } }),
 			marketUninstall: (name) => dshHost.marketFetch("/dsh-market/uninstall", { method: "POST", body: { name } }),
 			marketStatus: () => dshHost.marketFetch("/dsh-market/status"),
+			// connection RPC（方案 B）：调社区插件 rpc.handle 通道（如 mcp-manager）。
+			mcpRpc: (input) => dshHost.mcpRpc(input.channel, input.endpoint, input.payload),
 			isDshAgent: (agentId) =>
 				dshAgentManager?.list().some((tab) => tab.id === agentId) === true,
 			forkDshAgentSession: async (target, entryId) => {

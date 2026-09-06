@@ -22,6 +22,7 @@ import { createRequire } from "node:module";
 import { boot, loadOverlayPatches } from "@deepseek-ai/dsh-app-boot";
 import { provideCmdline } from "@deepseek-ai/dsh-cmdline";
 import { toFetchHandler } from "@deepseek-ai/dsh-host-apiproxy";
+import * as yaml from "js-yaml";
 
 const require = createRequire(import.meta.url);
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -104,6 +105,57 @@ export default {
 /** 模块级标志：本脚本创建的临时 DSH_HOME 才清理（真实 home 绝不删）。 */
 let homeIsTemp = false;
 
+/** hostEntry 同款 connection stub 源码（与 src/main/dsh/runtime/connectionStubSource.ts 同源）。 */
+const CONNECTION_STUB_SOURCE = `export default {
+  name: "pideck-connection-stub",
+  apply(ctx) {
+    const channels = new Map();
+    const connection = {
+      rpc: {
+        handle(channel, handler, options) {
+          if (typeof channel !== "string" || !channel.startsWith("/") || typeof handler !== "function") return () => {};
+          channels.set(channel, { handler, options });
+          return () => { channels.delete(channel); };
+        },
+      },
+    };
+    function splitPath(pathname) {
+      if (!pathname.startsWith("/")) return undefined;
+      const segments = pathname.split("/").filter((segment) => segment !== "");
+      if (segments.length < 2) return undefined;
+      const channel = "/" + segments[0];
+      const endpoint = segments.slice(1).join("/");
+      if (endpoint.split("/").some((segment) => segment === "" || segment === "." || segment === "..")) return undefined;
+      return { channel, endpoint };
+    }
+    async function dispatch(url, init) {
+      const parsed = splitPath(url.pathname);
+      if (parsed === undefined) return new Response("not found", { status: 404 });
+      const reg = channels.get(parsed.channel);
+      if (reg === undefined) return new Response("not found", { status: 404 });
+      if (((init && init.method) || "GET").toUpperCase() !== "POST") return new Response("method not allowed", { status: 405 });
+      let body;
+      try { body = JSON.parse(init && init.body ? init.body : "{}"); } catch { return new Response("body is not JSON", { status: 400 }); }
+      const rpcId = typeof body.rpcId === "string" ? body.rpcId : "unknown";
+      if (body.method !== parsed.endpoint) {
+        return new Response(JSON.stringify({ type: "server-response", rpcId, result: { ok: false, error: { code: "bad-request", message: "method does not match endpoint" } } }), { status: 200, headers: { "content-type": "application/json; charset=utf-8" } });
+      }
+      try {
+        const result = await reg.handler(parsed.endpoint, body.payload, init && init.signal);
+        return new Response(JSON.stringify({ type: "server-response", rpcId, result }), { status: 200, headers: { "content-type": "application/json; charset=utf-8" } });
+      } catch (error) {
+        return new Response("handler failure: " + String(error), { status: 500 });
+      }
+    }
+    ctx.provide("connection", connection);
+    ctx.provide("pideckMcpRouter", {
+      dispatch,
+      channels() { return Array.from(channels.keys()); },
+    });
+  },
+};
+`;
+
 async function main() {
   // ── DSH_HOME ────────────────────────────────────────────────────────────────
   let dshHome;
@@ -157,6 +209,50 @@ async function main() {
     ["export default {", "  apply(ctx) {", "    ctx.provide('directoryPicker', {", "      capability() { return { kind: 'none' }; },", "    });", "  },", "};", ""].join("\n"),
   );
   writeFileSync(join(configDir, "pideck-webserver-stub.js"), WEBSERVER_STUB_SOURCE, "utf8");
+  writeFileSync(join(configDir, "pideck-connection-stub.js"), CONNECTION_STUB_SOURCE, "utf8");
+  // bundle 恢复（与 hostEntry 同款）：profile dsh.profile.bundles → 读各包
+  // cordis.patch.yml 的 insert 行，name 绝对路径化后作为 loader entries。
+  const marketProfileDir = join(dshHome, "profiles", "pistudio");
+  const bundleIncludes = [];
+  try {
+    const manifestPath = join(marketProfileDir, "package.json");
+    if (existsSync(manifestPath)) {
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      const bundles = Array.isArray(manifest?.dsh?.profile?.bundles) ? manifest.dsh.profile.bundles.filter((b) => typeof b === "string") : [];
+      for (const bundleName of bundles) {
+        try {
+          const pkgDir = join(marketProfileDir, "node_modules", bundleName);
+          const pkgPath = join(pkgDir, "package.json");
+          if (!existsSync(pkgPath)) continue;
+          const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
+          const patchRel = pkg?.dsh?.bundle?.patch;
+          if (typeof patchRel !== "string" || !patchRel) continue;
+          const patchPath = join(pkgDir, patchRel);
+          if (!existsSync(patchPath)) continue;
+          const rows = yaml.load(readFileSync(patchPath, "utf8"));
+          for (const row of Array.isArray(rows) ? rows : []) {
+            for (const item of Array.isArray(row?.insert) ? row.insert : []) {
+              if (typeof item?.id !== "string" || typeof item?.name !== "string") continue;
+              const entryPkgPath = join(marketProfileDir, "node_modules", item.name, "package.json");
+              let entry;
+              try {
+                const entryPkg = JSON.parse(readFileSync(entryPkgPath, "utf8"));
+                entry = join(marketProfileDir, "node_modules", item.name, typeof entryPkg?.main === "string" ? entryPkg.main : "lib/index.js");
+              } catch {
+                entry = join(marketProfileDir, "node_modules", item.name, "lib/index.js");
+              }
+              bundleIncludes.push({
+                id: `bundle-${bundleName}-${item.id}`,
+                name: pathToFileURL(entry).href,
+                ...(item.config !== undefined ? { config: item.config } : {}),
+              });
+            }
+          }
+        } catch { /* 单个失败跳过 */ }
+      }
+    }
+  } catch { /* 跳过恢复 */ }
+  const webPatchPath = join(dshHome, "profiles", "web", "cordis.patch.yml");
   patches.push({
     insert: [
       { id: "storage", name: "@deepseek-ai/dsh-storage" },
@@ -169,9 +265,13 @@ async function main() {
       // profile 'pistudio' = DSH_HOME/profiles/pistudio（dsh CLI 官方约定路径）。
       { id: "pideck-webserver-stub", name: join(configDir, "pideck-webserver-stub.js") },
       { id: "dsh-market", name: require.resolve("dshmarket"), config: { profile: "pistudio", allowRestart: false } },
+      // 方案 B：connection stub + 已装 bundle 恢复 + 用户 MCP patch 层。
+      { id: "pideck-connection-stub", name: join(configDir, "pideck-connection-stub.js") },
+      ...bundleIncludes,
+      ...(existsSync(webPatchPath) ? [{ id: "user-mcp-patch", name: "cordis:include", config: { path: pathToFileURL(webPatchPath).href } }] : []),
     ],
   });
-  log("compose", `patches=${patches.length} 条（含 dshmarket + webserver stub）`);
+  log("compose", `patches=${patches.length} 条（含 dshmarket + webserver/connection stub + ${bundleIncludes.length} bundles）`);
 
   // ── boot ────────────────────────────────────────────────────────────────────
   const bootStartedAt = Date.now();
@@ -278,6 +378,27 @@ async function main() {
     }
   } catch (error) {
     log("install", `跳过：${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  // ── 验证 4：connection RPC（方案 B）——dsh-mcp-manager 的 /mcp-manager 通道 ──
+  try {
+    const mcpRouter = ctx.get("pideckMcpRouter");
+    const registeredChannels = mcpRouter?.channels?.() ?? [];
+    log("mcp-rpc", `connection stub 已注册通道: ${JSON.stringify(registeredChannels)}`);
+    const rpcResponse = await mcpRouter.dispatch(new URL("/mcp-manager/list", "http://dsh.internal"), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ rpcId: "probe-1", method: "list", payload: undefined }),
+    });
+    const rpcText = await rpcResponse.text();
+    log("mcp-rpc", `HTTP ${rpcResponse.status}  ${rpcText.slice(0, 400)}`);
+    if (rpcResponse.status === 200) {
+      const envelope = JSON.parse(rpcText);
+      const servers = envelope?.result?.value?.servers;
+      log("mcp-rpc", `servers=${Array.isArray(servers) ? servers.length : "?"}  ${JSON.stringify(Array.isArray(servers) ? servers.map((s) => ({ id: s.id, serverName: s.serverName, enabled: s.enabled, toolCount: s.toolCount })) : envelope).slice(0, 300)}`);
+    }
+  } catch (error) {
+    log("mcp-rpc", `失败：${error instanceof Error ? error.message : String(error)}`);
   }
 
   log("done", "POC 验证完成");

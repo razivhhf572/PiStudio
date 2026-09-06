@@ -694,6 +694,9 @@ const api = {
 		/** dshmarket 安装/更新进度状态。 */
 		marketStatus: () =>
 			ipcRenderer.invoke(ipcChannels.dshMarketStatus) as Promise<import("../shared/types").DshMarketStatus>,
+		/** connection RPC（方案 B）：调社区插件 rpc.handle 通道（如 /mcp-manager）。 */
+		mcpRpc: (input: import("../shared/types").DshMcpRpcInput) =>
+			ipcRenderer.invoke(ipcChannels.dshMcpRpc, input) as Promise<unknown>,
 		sendPrompt: (input: SendSessionPromptInput) =>
 			ipcRenderer.invoke(ipcChannels.sessionsSendPrompt, input) as Promise<SendSessionPromptResult>,
 		sendUiResponse: (input: SessionUiResponseInput) =>

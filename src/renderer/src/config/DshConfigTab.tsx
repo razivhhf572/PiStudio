@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useMemo
 import { useAtomValue } from "jotai";
 import {
 ArchiveRestore,
+Cable,
 ChevronDown,
 Cpu,
 FileCode2,
@@ -36,6 +37,7 @@ import { dshRuntimeStatusAtom } from "../atoms/dsh-atoms";
 import { isDshPluginNamespace, dshPluginNamespaceTitleKey, dshPluginNamespaceDescriptionKey } from "./dshPluginNamespaces";
 import { DshPluginSection, PluginInventoryView } from "./DshPluginSection";
 import { PluginMarketView } from "./DshPluginMarket";
+import { DshMcpPanel } from "./DshMcpPanel";
 import { DeepseekRouteCard, PiAiProvidersCard } from "./DshProviderCards";
 import { collectCredentialRefsWithValue, normalizeDshSchema, type DshSectionApi } from "./dshSchema";
 import { presetDisplayDescription, presetDisplayName } from "./dshPresetDisplay";
@@ -74,6 +76,7 @@ const NAV_ITEMS: Array<{ id: string; labelKey: TranslationKey; icon: ReactNode }
 	{ id: "models", labelKey: "config.dsh.tab.models", icon: <Cpu className="size-3.5" aria-hidden="true" /> },
 	{ id: "presets", labelKey: "config.dsh.tab.presets", icon: <AgentPresetLogo className="size-3.5" aria-hidden="true" /> },
 	{ id: "plugins", labelKey: "config.dsh.tab.plugins", icon: <Puzzle className="size-3.5" aria-hidden="true" /> },
+	{ id: "mcp", labelKey: "config.dsh.tab.mcp", icon: <Cable className="size-3.5" aria-hidden="true" /> },
 { id: "security", labelKey: "config.dsh.tab.security", icon: <ShieldCheck className="size-3.5" aria-hidden="true" /> },
 { id: "raw", labelKey: "config.dsh.tab.raw", icon: <FileCode2 className="size-3.5" aria-hidden="true" /> },
 ];
@@ -574,6 +577,12 @@ export const DshConfigTab = forwardRef<DshConfigTabHandle, {
 						<div hidden={activeTab !== "security"}>
 							<div className="p-4">
 								<SecurityTab namespace={permissionNamespace} writable={writable} onSave={(patch) => saveNamespace("permission", patch)} onChanged={() => void load()} sectionApi={sectionApi} instanceKey="dsh:security" />
+							</div>
+						</div>
+						{/* 方案 B：MCP 服务器管理（dsh-mcp-manager RPC 通道） */}
+						<div hidden={activeTab !== "mcp"}>
+							<div className="p-4">
+								<DshMcpPanel />
 							</div>
 						</div>
 						<div hidden={activeTab !== "raw"} className="flex min-h-0 flex-1 flex-col">

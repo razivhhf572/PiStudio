@@ -188,6 +188,8 @@ export const ipcChannels = {
 	dshMarketUninstall: "dsh:market-uninstall",
 	/** dshmarket 市场：安装/更新进度状态。 */
 	dshMarketStatus: "dsh:market-status",
+	/** connection RPC（方案 B）：调社区插件 rpc.handle 通道（如 /mcp-manager）。 */
+	dshMcpRpc: "dsh:mcp-rpc",
 	/** DSH host 级模型目录（llm.models），不依赖已启动的会话。 */
 	dshListModels: "dsh:list-models",
 	/** DSH 配置页模型发现（llm.discoverModels；只返回候选，不写配置）。 */

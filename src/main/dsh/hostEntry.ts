@@ -14,13 +14,14 @@
  * 注意：本文件被 electron-vite 主进程构建打包（rollup 多入口），产物为 CJS；
  * @deepseek-ai/* 全部 externalize，运行时动态 import() 加载（与 DshHost 一致）。
  */
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { installHiddenConsolePatch, installHostHiddenConsole } from "./hideChildConsoles";
 import { agentPresetsRow, dshWebAgentPlaneDisableRows } from "./dshPresetComposition";
 import { WEBSERVER_STUB_SOURCE } from "./runtime/webserverStubSource";
+import { CONNECTION_STUB_SOURCE } from "./runtime/connectionStubSource";
 import {
 	PIDECK_PLUGIN_BRIDGE_PATH,
 	handlePluginBridgeFetch,
@@ -118,6 +119,63 @@ async function main(): Promise<void> {
 	for (const row of dshWebAgentPlaneDisableRows()) {
 		patches.push(row);
 	}
+	// 方案 B：用户级 MCP patch 层——dsh-mcp-manager 默认读写
+	// $DSH_HOME/profiles/web/cordis.patch.yml（写死 web profile），本 host 在
+	// insert 数组里 include 它（存在时），其管理的 MCP server 条目对 PiStudio 生效。
+	const webPatchPath = join(dshHome, "profiles", "web", "cordis.patch.yml");
+	// 方案 A/B 补足：恢复已装插件——dshmarket 把 bundle 持久化在 profile
+	// package.json 的 dsh.profile.bundles + 各包 dsh.bundle.patch（patch 内容是
+	// `- insert: [{id, name}]` 操作）。host 启动时把每个 bundle 的 insert 行
+	// 直接作为 loader entries 加入组合（name 绝对路径化到 profile node_modules
+	// 的包入口——profile 的 node_modules 不在 app 解析链上），重启后插件保持加载。
+	const marketProfileDir = join(dshHome, "profiles", "pistudio");
+	const bundleIncludes: Array<{ id: string; name: string; config?: Record<string, unknown> }> = [];
+	try {
+		const manifestPath = join(marketProfileDir, "package.json");
+		if (existsSync(manifestPath)) {
+			const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { dsh?: { profile?: { bundles?: unknown } } };
+			const bundles = Array.isArray(manifest.dsh?.profile?.bundles)
+				? manifest.dsh.profile.bundles.filter((bundle): bundle is string => typeof bundle === "string")
+				: [];
+			for (const bundleName of bundles) {
+				try {
+					const pkgDir = join(marketProfileDir, "node_modules", bundleName);
+					const pkgPath = join(pkgDir, "package.json");
+					if (!existsSync(pkgPath)) continue;
+					const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { dsh?: { bundle?: { patch?: unknown } }; main?: unknown };
+					const patchRel = pkg.dsh?.bundle?.patch;
+					if (typeof patchRel !== "string" || !patchRel) continue;
+					const patchPath = join(pkgDir, patchRel);
+					if (!existsSync(patchPath)) continue;
+					const rows = require("js-yaml").load(readFileSync(patchPath, "utf8")) as Array<{ insert?: Array<{ id?: unknown; name?: unknown; config?: Record<string, unknown> }> }> | null;
+					for (const row of Array.isArray(rows) ? rows : []) {
+						for (const item of Array.isArray(row?.insert) ? row.insert : []) {
+							if (typeof item?.id !== "string" || typeof item?.name !== "string") continue;
+							// name 绝对路径化：包入口（main 或 lib/index.js）——Loader 走
+							// ESM 动态 import，目录裸名解析不到 profile node_modules。
+							const entryPkgPath = join(marketProfileDir, "node_modules", item.name, "package.json");
+							let entry: string;
+							try {
+								const entryPkg = JSON.parse(readFileSync(entryPkgPath, "utf8")) as { main?: unknown };
+								entry = join(marketProfileDir, "node_modules", item.name, typeof entryPkg.main === "string" ? entryPkg.main : "lib/index.js");
+							} catch {
+								entry = join(marketProfileDir, "node_modules", item.name, "lib/index.js");
+							}
+							bundleIncludes.push({
+								id: `bundle-${bundleName}-${item.id}`,
+								name: pathToFileURL(entry).href,
+								...(item.config !== undefined ? { config: item.config } : {}),
+							});
+						}
+					}
+				} catch {
+					// 单个 bundle 解析失败不阻断启动
+				}
+			}
+		}
+	} catch {
+		// profile 不可读时跳过恢复（干净启动）
+	}
 	patches.push({
 		insert: [
 			{ id: "storage", name: "@deepseek-ai/dsh-storage" },
@@ -191,6 +249,15 @@ async function main(): Promise<void> {
 				name: require.resolve("dshmarket"),
 				config: { profile: "pistudio", allowRestart: false },
 			},
+			// connection stub（方案 B）：headless host 无 dsh-client-connection，
+			// 社区插件（dsh-mcp-manager 等）inject ['connection'] 需要 rpc.handle。
+			{ id: "pideck-connection-stub", name: join(configDir, "pideck-connection-stub.js") },
+			// 恢复已装插件（方案 A/B）：dshmarket 持久化的 profile bundles。
+			...bundleIncludes,
+			// 用户级 MCP patch 层（方案 B）：dsh-mcp-manager 默认读写
+			// $DSH_HOME/profiles/web/cordis.patch.yml（写死 web profile）——本 host
+			// include 该文件（存在时），其管理的 MCP server 条目对 PiStudio 生效。
+			...(existsSync(webPatchPath) ? [{ id: "user-mcp-patch", name: "cordis:include", config: { path: pathToFileURL(webPatchPath).href } }] : []),
 		],
 	});
 
@@ -291,6 +358,10 @@ async function main(): Promise<void> {
 	// 写入 configDir 供 cordis 组合加载（与 slash-bridge 同模式，运行时写入）。
 	const webserverStubPath = join(configDir, "pideck-webserver-stub.js");
 	writeFileSync(webserverStubPath, WEBSERVER_STUB_SOURCE, "utf8");
+	// 方案 B：最小 connection stub（rpc.handle 注册表，供 mcp-manager 等社区插件
+	// inject ['connection']）。
+	const connectionStubPath = join(configDir, "pideck-connection-stub.js");
+	writeFileSync(connectionStubPath, CONNECTION_STUB_SOURCE, "utf8");
 
 	const startedAt = Date.now();
 	const ctx = await boot(
@@ -340,6 +411,23 @@ async function main(): Promise<void> {
 			return Promise.resolve(
 				new Response(
 					JSON.stringify({ ok: false, error: "market router unavailable" }),
+					{ status: 503, headers: { "content-type": "application/json; charset=utf-8" } },
+				),
+			);
+		}
+		// connection RPC 通道（方案 B）：/<channel>/<endpoint>（如 /mcp-manager/list）
+		// 走 connection stub 的 dispatch——社区插件（dsh-mcp-manager 等）经
+		// ctx.connection.rpc.handle 注册的通道都由它分发。
+		if (url.pathname.startsWith("/mcp-manager/")) {
+			const mcpRouter = ctx.get("pideckMcpRouter") as
+				| { dispatch?(url: URL, init?: RequestInit): Promise<Response> }
+				| undefined;
+			if (mcpRouter?.dispatch) {
+				return mcpRouter.dispatch(url, init);
+			}
+			return Promise.resolve(
+				new Response(
+					JSON.stringify({ type: "server-response", rpcId: "unknown", result: { ok: false, error: { code: "unavailable", message: "connection stub unavailable" } } }),
 					{ status: 503, headers: { "content-type": "application/json; charset=utf-8" } },
 				),
 			);

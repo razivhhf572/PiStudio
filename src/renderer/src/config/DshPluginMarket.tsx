@@ -51,6 +51,8 @@ export function PluginMarketView() {
 	const [installed, setInstalled] = useState<DshMarketInstalled | null>(null);
 	const [loadError, setLoadError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
+	/** host settings 命名空间（describeDshSettings）；null = 未拉到（不标注）。 */
+	const [settingsNamespaces, setSettingsNamespaces] = useState<string[] | null>(null);
 	const [query, setQuery] = useState("");
 	const [page, setPage] = useState(1);
 	/** 市场视图：全部插件 / 已安装。 */
@@ -77,6 +79,13 @@ export function PluginMarketView() {
 			setLoadError(error instanceof Error ? error.message : String(error));
 		} finally {
 			setLoading(false);
+		}
+		// 插件配置命名空间（「插件配置」tab 的呈现依据）——拉不到就保持 null（不标注）。
+		try {
+			const settingsResult = await desktopApi.sessions.describeDshSettings();
+			setSettingsNamespaces((settingsResult?.namespaces ?? []).map((ns) => ns.ns));
+		} catch {
+			setSettingsNamespaces(null);
 		}
 	}, []);
 
@@ -204,6 +213,18 @@ export function PluginMarketView() {
 		return installedRows.filter((row) => row.name.toLocaleLowerCase().includes(normalizedQuery));
 	}, [installedRows, normalizedQuery]);
 
+	/**
+	 * 插件是否有设置界面：host settings 命名空间里存在该插件的短名。
+	 * settings namespace 即插件短名（kebab-case），匹配 npm 全名/去 scope 名/
+	 * 去 dsh- 前缀名；拉不到命名空间（null）时不标注。
+	 */
+	const hasSettings = (name: string): boolean => {
+		if (settingsNamespaces === null) return true; // 未知：不标「无设置」
+		const short = name.startsWith("@") ? name.slice(name.indexOf("/") + 1) : name;
+		const candidates = new Set([name, short, short.replace(/^dsh-/, "")]);
+		return settingsNamespaces.some((ns) => candidates.has(ns));
+	};
+
 	return (
 		<div className="grid gap-2.5">
 			<p className="text-micro text-muted-foreground">{t("config.dsh.marketHint")}</p>
@@ -277,6 +298,11 @@ export function PluginMarketView() {
 									>
 										{row.state === "live" ? t("config.dsh.marketLive") : t("config.dsh.marketInstalled")}
 									</Badge>
+									{settingsNamespaces !== null && !hasSettings(row.name) && (
+										<Badge variant="outline" className="shrink-0 border-border-subtle text-micro text-muted-foreground" title={t("config.dsh.marketNoSettingsHint")}>
+											{t("config.dsh.marketNoSettings")}
+										</Badge>
+									)}
 								</div>
 								<div className="mt-0.5 min-w-0 truncate font-mono text-micro text-text-secondary" title={row.spec}>
 									{row.spec}

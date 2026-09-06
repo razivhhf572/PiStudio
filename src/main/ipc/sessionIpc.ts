@@ -272,6 +272,8 @@ export type DshBackendIpcDeps = {
 	marketUninstall?: (name: string) => Promise<unknown>;
 	/** dshmarket 安装/更新进度状态；未装配时抛错。 */
 	marketStatus?: () => Promise<unknown>;
+	/** connection RPC（方案 B）：调社区插件 rpc.handle 通道；未装配时抛错。 */
+	mcpRpc?: (input: import("../../shared/types").DshMcpRpcInput) => Promise<unknown>;
 	/** DSH 动态插件卸载（undefine）；未装配时抛错。 */
 	uninstallDshPlugin?: (input: import("../../shared/types").DshPluginLifecycleInput) => Promise<unknown>;
 	/** 判断 agentId 是否属于 DSH 后端（fork 等 pi 专属命令按 backend 分流）。 */
@@ -455,6 +457,7 @@ export function registerSessionIpc(deps: SessionIpcDeps): void {
 		marketInstall,
 		marketUninstall,
 		marketStatus,
+		mcpRpc,
 		isDshAgent = () => false,
 		forkDshAgentSession,
 		cloneDshAgentSession,
@@ -1382,60 +1385,74 @@ export function registerSessionIpc(deps: SessionIpcDeps): void {
 			return stopDshPlugin(input as import("../../shared/types").DshPluginLifecycleInput);
 		},
 	);
-	ipcMain.handle(
-		ipcChannels.dshPluginUninstall,
-		async (_event, input: unknown): Promise<unknown> => {
-			if (typeof input !== "object" || input === null) {
-				throw new Error("invalid plugin lifecycle payload");
-			}
-			const record = input as Record<string, unknown>;
-			if (typeof record.sessionId !== "string" || !record.sessionId || typeof record.pluginId !== "string" || !record.pluginId) {
-				throw new Error("invalid plugin lifecycle payload");
-			}
-			if (!uninstallDshPlugin) throw new Error("DSH plugin uninstall is not available");
-			return uninstallDshPlugin(input as import("../../shared/types").DshPluginLifecycleInput);
-			},
-			);
-			// dshmarket 市场（方案 A）：经 fetch 桥打 /dsh-market/* 路由（同源由 stub 补齐）。
-			ipcMain.handle(
-			ipcChannels.dshMarketCatalog,
-			async (): Promise<unknown> => {
-			if (!marketCatalog) throw new Error("DSH market is not available");
-			return marketCatalog();
-			},
-			);
-			ipcMain.handle(
-			ipcChannels.dshMarketInstalled,
-			async (): Promise<unknown> => {
-			if (!marketInstalled) throw new Error("DSH market is not available");
-			return marketInstalled();
-			},
-			);
-			ipcMain.handle(
-			ipcChannels.dshMarketInstall,
-			async (_event, url: unknown): Promise<unknown> => {
-			if (typeof url !== "string" || !url) throw new Error("invalid market install payload");
-			if (!marketInstall) throw new Error("DSH market install is not available");
-			return marketInstall(url);
-			},
-			);
-			ipcMain.handle(
-			ipcChannels.dshMarketUninstall,
-			async (_event, name: unknown): Promise<unknown> => {
-			if (typeof name !== "string" || !name) throw new Error("invalid market uninstall payload");
-			if (!marketUninstall) throw new Error("DSH market uninstall is not available");
-			return marketUninstall(name);
-			},
-			);
-			ipcMain.handle(
-			ipcChannels.dshMarketStatus,
-			async (): Promise<unknown> => {
-			if (!marketStatus) throw new Error("DSH market is not available");
-			return marketStatus();
-			},
-			);
-			ipcMain.handle(
-			ipcChannels.sessionsCatalogCopy,
+ipcMain.handle(
+	ipcChannels.dshPluginUninstall,
+	async (_event, input: unknown): Promise<unknown> => {
+		if (typeof input !== "object" || input === null) {
+			throw new Error("invalid plugin lifecycle payload");
+		}
+		const record = input as Record<string, unknown>;
+		if (typeof record.sessionId !== "string" || !record.sessionId || typeof record.pluginId !== "string" || !record.pluginId) {
+			throw new Error("invalid plugin lifecycle payload");
+		}
+		if (!uninstallDshPlugin) throw new Error("DSH plugin uninstall is not available");
+		return uninstallDshPlugin(input as import("../../shared/types").DshPluginLifecycleInput);
+	},
+);
+// dshmarket 市场（方案 A）：经 fetch 桥打 /dsh-market/* 路由（同源由 stub 补齐）。
+ipcMain.handle(
+	ipcChannels.dshMarketCatalog,
+	async (): Promise<unknown> => {
+		if (!marketCatalog) throw new Error("DSH market is not available");
+		return marketCatalog();
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshMarketInstalled,
+	async (): Promise<unknown> => {
+		if (!marketInstalled) throw new Error("DSH market is not available");
+		return marketInstalled();
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshMarketInstall,
+	async (_event, url: unknown): Promise<unknown> => {
+		if (typeof url !== "string" || !url) throw new Error("invalid market install payload");
+		if (!marketInstall) throw new Error("DSH market install is not available");
+		return marketInstall(url);
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshMarketUninstall,
+	async (_event, name: unknown): Promise<unknown> => {
+		if (typeof name !== "string" || !name) throw new Error("invalid market uninstall payload");
+		if (!marketUninstall) throw new Error("DSH market uninstall is not available");
+		return marketUninstall(name);
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshMarketStatus,
+	async (): Promise<unknown> => {
+		if (!marketStatus) throw new Error("DSH market is not available");
+		return marketStatus();
+	},
+);
+ipcMain.handle(
+	ipcChannels.dshMcpRpc,
+	async (_event, input: unknown): Promise<unknown> => {
+		if (typeof input !== "object" || input === null) {
+			throw new Error("invalid mcp rpc payload");
+		}
+		const record = input as Record<string, unknown>;
+		if (typeof record.channel !== "string" || !record.channel.startsWith("/") || typeof record.endpoint !== "string" || !record.endpoint) {
+			throw new Error("invalid mcp rpc payload");
+		}
+		if (!mcpRpc) throw new Error("DSH mcp rpc is not available");
+		return mcpRpc(input as import("../../shared/types").DshMcpRpcInput);
+	},
+);
+ipcMain.handle(
+	ipcChannels.sessionsCatalogCopy,
 		async (_event, sessionId: string) => {
 			const result = await copyCatalogSession(sessionId);
 			void appLogger.info("session", "Session copied", {

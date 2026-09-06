@@ -481,6 +481,9 @@ export function createPreviewApi(): PiDesktopApi {
 			marketStatus: async () => {
 				throw new Error("preview mode: market is not available");
 			},
+			mcpRpc: async () => {
+				throw new Error("preview mode: mcp rpc is not available");
+			},
 			listCatalog: async (projectId, _options?: { scan?: boolean }): Promise<SessionRecord[]> => getSessions().map((session) => ({
 				id: `preview-record:${session.id}`,
 				projectId,
