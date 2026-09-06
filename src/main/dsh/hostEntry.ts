@@ -20,6 +20,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { installHiddenConsolePatch, installHostHiddenConsole } from "./hideChildConsoles";
 import { agentPresetsRow, dshWebAgentPlaneDisableRows } from "./dshPresetComposition";
+import { WEBSERVER_STUB_SOURCE } from "./runtime/webserverStubSource";
 import {
 	PIDECK_PLUGIN_BRIDGE_PATH,
 	handlePluginBridgeFetch,
@@ -179,6 +180,17 @@ async function main(): Promise<void> {
 				id: "pideck-minimal-tool-filter",
 				name: "./pideck-minimal-tool-filter.js",
 			},
+			// 插件市场（方案 A）：dshmarket 1.44.0 + 最小 webServer stub（headless host
+			// 无 webServer 服务，dshmarket 必须注入 webServer/loader 才能挂路由）。
+			// profile 'pistudio' = ~/.dsh/profiles/pistudio（dsh CLI 官方约定，dshmarket
+			// profile.ts 默认推导路径，零适配）。allowRestart=false：host 生命周期由
+			// PiStudio 主进程（DshHost）管理，不允许市场自重启。
+			{ id: "pideck-webserver-stub", name: join(configDir, "pideck-webserver-stub.js") },
+			{
+				id: "dsh-market",
+				name: require.resolve("dshmarket"),
+				config: { profile: "pistudio", allowRestart: false },
+			},
 		],
 	});
 
@@ -275,6 +287,11 @@ async function main(): Promise<void> {
 		].join("\n"),
 	);
 
+	// dshmarket 适配：headless host 无 webServer 服务，把最小 webServer stub
+	// 写入 configDir 供 cordis 组合加载（与 slash-bridge 同模式，运行时写入）。
+	const webserverStubPath = join(configDir, "pideck-webserver-stub.js");
+	writeFileSync(webserverStubPath, WEBSERVER_STUB_SOURCE, "utf8");
+
 	const startedAt = Date.now();
 	const ctx = await boot(
 		"pideck-dsh",
@@ -310,6 +327,22 @@ async function main(): Promise<void> {
 				headers: init?.headers as Record<string, string> | undefined,
 				body: typeof init?.body === "string" ? init.body : undefined,
 			});
+		}
+		// dshmarket 市场路由（方案 A）：/dsh-market/api/v1/* 走 webServer stub 的
+		// dispatch（把 fetch 桥请求适配成 node:http 风格后调原路由 handler）。
+		if (url.pathname.startsWith("/dsh-market/")) {
+			const marketRouter = ctx.get("pideckMarketRouter") as
+				| { dispatch?(url: URL, init?: RequestInit): Promise<Response> }
+				| undefined;
+			if (marketRouter?.dispatch) {
+				return marketRouter.dispatch(url, init);
+			}
+			return Promise.resolve(
+				new Response(
+					JSON.stringify({ ok: false, error: "market router unavailable" }),
+					{ status: 503, headers: { "content-type": "application/json; charset=utf-8" } },
+				),
+			);
 		}
 		return apiHandler.fetch(url, init);
 	};

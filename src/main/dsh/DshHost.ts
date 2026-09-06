@@ -1,5 +1,5 @@
 import { mkdirSync, existsSync, readFileSync, writeFileSync, rmSync, renameSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, delimiter } from "node:path";
 import { homedir } from "node:os";
 import { pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
@@ -504,6 +504,33 @@ export class DshHost {
 		return this.bridgeRpc(PIDECK_PLUGIN_BRIDGE_PATH, method, params);
 	}
 
+	/**
+	 * dshmarket 市场调用（方案 A）：经 fetch 桥打 /dsh-market/* 路由。
+	 * hostEntry 的 handler 把 /dsh-market/ 前缀转发给 webServer stub 的 dispatch
+	 * （同源 host/origin 头由 stub 补齐）。HTTP >= 400 时抛 error 文本。
+	 */
+	async marketFetch(path: string, init?: { method?: string; body?: unknown }): Promise<unknown> {
+		await this.ensureStarted();
+		if (!this.apiClient) throw new Error("DSH host is not started");
+		const response = await this.apiClient.rawFetch(path, {
+			method: init?.method ?? "GET",
+			headers: { "content-type": "application/json" },
+			...(init?.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
+		});
+		const text = await response.text();
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(text);
+		} catch {
+			throw new Error(`market returned non-JSON response (HTTP ${response.status})`);
+		}
+		if (response.status >= 400) {
+			const error = (parsed as { error?: unknown } | null)?.error;
+			throw new Error(typeof error === "string" ? error : `market request failed (HTTP ${response.status})`);
+		}
+		return parsed;
+	}
+
 	/** 动态插件清单（进程内全部会话的临时扩展；重启即失）。 */
 	async listDynamicPlugins(): Promise<DshPluginView[]> {
 		const value = await this.pluginRpc("inventory", undefined);
@@ -769,6 +796,13 @@ export class DshHost {
 		// 注意：这会使 host 内所有 undici fetch 都走代理（含 dsh.internal 内网桥除外——
 		// 桥走主进程 fetch，不在 host 内发请求），需要绕过本机的场景请配置 bypass。
 		const forkEnv = buildDshHostForkEnv();
+		// dshmarket 安装插件时 spawn `dsh` CLI（dshArgv fallback 走 PATH）。打包后
+		// PATH 里没有 node/npm/dsh，.bin shim 也不可用——生成一个绝对路径 shim
+		// （ELECTRON_RUN_AS_NODE 模式跑 runtime 的 dsh bin.js）并注入 host PATH。
+		const marketBinDir = join(pideckDshHome(this.dshHome), "bin");
+		mkdirSync(marketBinDir, { recursive: true });
+		writeDshCliShim(marketBinDir, process.execPath, join(appRoot, "@deepseek-ai", "dsh", "lib", "bin.js"));
+		forkEnv.PATH = `${marketBinDir}${delimiter}${forkEnv.PATH ?? ""}`;
 		const proxyPatch = this.resolveHostProxyEnvPatch();
 		if (proxyPatch) applyProxyEnvPatch(forkEnv, proxyPatch);
 
@@ -911,4 +945,22 @@ function buildDshHostForkEnv(): Record<string, string> {
 		env[key] = value;
 	}
 	return env;
+}
+
+/**
+ * 写 dsh CLI shim（Windows .cmd）：dshmarket 安装插件时经 PATH spawn `dsh` 命令。
+ * 打包后 PATH 无 node/npm/dsh、node_modules/.bin 的 shim 也不可用（相对路径 + PATH node），
+ * 这里用绝对路径：node 可执行（Electron 以 ELECTRON_RUN_AS_NODE 模式运行）+ runtime 的
+ * dsh bin.js。每次 fork 前重写（幂等），路径变化自动跟随。
+ */
+function writeDshCliShim(binDir: string, nodeExe: string, dshBinJs: string): void {
+	const shim = [
+		"@ECHO off",
+		"SETLOCAL",
+		"SET \"ELECTRON_RUN_AS_NODE=1\"",
+		`"${nodeExe}" "${dshBinJs}" %*`,
+		"ENDLOCAL",
+		"",
+	].join("\r\n");
+	writeFileSync(join(binDir, "dsh.cmd"), shim, "utf8");
 }

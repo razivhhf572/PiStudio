@@ -81,3 +81,59 @@ export type DshSkillView = {
 	/** false = 用户专用技能（disable-model-invocation）：模型目录不可见、仅用户可调用。 */
 	modelInvocable: boolean;
 };
+
+/**
+ * dshmarket 市场契约（方案 A）。主进程 IPC 直接透传 dshmarket 路由的 JSON 响应，
+ * 这里只定义 renderer 用得到的窄视图（宽松字段，未知字段不拦截）。
+ */
+
+/** 市场目录条目（curated registry 快照：awesome-dsh-plugin 精选来源）。 */
+export type DshMarketPluginEntry = {
+	name: string;
+	url: string;
+	description?: string;
+	categories?: string[];
+};
+
+/** 市场目录响应（GET /dsh-market/registry → { registry }）。 */
+export type DshMarketCatalog = {
+	registry: {
+		name: string;
+		url: string;
+		updated?: string;
+		count: number;
+		plugins: DshMarketPluginEntry[];
+	};
+};
+
+/** 已装插件响应（GET /dsh-market/installed → { profile, installed, ... }）。 */
+export type DshMarketInstalled = {
+	profile: string;
+	/** name → spec（package.json dependencies 形状）。 */
+	installed: Record<string, string>;
+	/** 当前 live（已激活）的插件名。 */
+	live: string[];
+	disabled: string[];
+};
+
+/** 安装/卸载响应（POST /dsh-market/install | /dsh-market/uninstall）。 */
+export type DshMarketMutationResult = {
+	ok: boolean;
+	hot?: boolean;
+	exitCode?: number;
+	error?: string;
+	activation?: Record<string, unknown>;
+};
+
+/** 安装进度状态（GET /dsh-market/status）。 */
+export type DshMarketStatus = {
+	active: boolean;
+	target: string;
+	seconds: number;
+	phase: string | null;
+	done: number;
+	total: number | null;
+	error: string | null;
+	busy: boolean;
+	pnpm: boolean;
+};

@@ -178,6 +178,16 @@ export const ipcChannels = {
 	dshPluginStop: "dsh:plugin-stop",
 	/** DSH 动态插件卸载（undefine：删除插件与全部包版本）。 */
 	dshPluginUninstall: "dsh:plugin-uninstall",
+	/** dshmarket 市场（方案 A）：市场目录（curated registry 快照）。 */
+	dshMarketCatalog: "dsh:market-catalog",
+	/** dshmarket 市场：已装插件清单（profile + activation）。 */
+	dshMarketInstalled: "dsh:market-installed",
+	/** dshmarket 市场：安装插件（POST {url}，url 必须在 curated registry 内）。 */
+	dshMarketInstall: "dsh:market-install",
+	/** dshmarket 市场：卸载插件（POST {name}）。 */
+	dshMarketUninstall: "dsh:market-uninstall",
+	/** dshmarket 市场：安装/更新进度状态。 */
+	dshMarketStatus: "dsh:market-status",
 	/** DSH host 级模型目录（llm.models），不依赖已启动的会话。 */
 	dshListModels: "dsh:list-models",
 	/** DSH 配置页模型发现（llm.discoverModels；只返回候选，不写配置）。 */

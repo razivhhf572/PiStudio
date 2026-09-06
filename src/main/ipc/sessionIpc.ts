@@ -262,6 +262,16 @@ export type DshBackendIpcDeps = {
 	runDshPlugin?: (input: import("../../shared/types").DshPluginLifecycleInput) => Promise<unknown>;
 	/** DSH 动态插件停止；未装配时抛错。 */
 	stopDshPlugin?: (input: import("../../shared/types").DshPluginLifecycleInput) => Promise<unknown>;
+	/** dshmarket 市场目录（方案 A）；未装配时抛错。 */
+	marketCatalog?: () => Promise<unknown>;
+	/** dshmarket 已装清单；未装配时抛错。 */
+	marketInstalled?: () => Promise<unknown>;
+	/** dshmarket 安装（url 必须在 curated registry 内）；未装配时抛错。 */
+	marketInstall?: (url: string) => Promise<unknown>;
+	/** dshmarket 卸载（按插件名）；未装配时抛错。 */
+	marketUninstall?: (name: string) => Promise<unknown>;
+	/** dshmarket 安装/更新进度状态；未装配时抛错。 */
+	marketStatus?: () => Promise<unknown>;
 	/** DSH 动态插件卸载（undefine）；未装配时抛错。 */
 	uninstallDshPlugin?: (input: import("../../shared/types").DshPluginLifecycleInput) => Promise<unknown>;
 	/** 判断 agentId 是否属于 DSH 后端（fork 等 pi 专属命令按 backend 分流）。 */
@@ -1379,10 +1389,48 @@ export function registerSessionIpc(deps: SessionIpcDeps): void {
 			}
 			if (!uninstallDshPlugin) throw new Error("DSH plugin uninstall is not available");
 			return uninstallDshPlugin(input as import("../../shared/types").DshPluginLifecycleInput);
-		},
-	);
-	ipcMain.handle(
-		ipcChannels.sessionsCatalogCopy,
+			},
+			);
+			// dshmarket 市场（方案 A）：经 fetch 桥打 /dsh-market/* 路由（同源由 stub 补齐）。
+			ipcMain.handle(
+			ipcChannels.dshMarketCatalog,
+			async (): Promise<unknown> => {
+			if (!marketCatalog) throw new Error("DSH market is not available");
+			return marketCatalog();
+			},
+			);
+			ipcMain.handle(
+			ipcChannels.dshMarketInstalled,
+			async (): Promise<unknown> => {
+			if (!marketInstalled) throw new Error("DSH market is not available");
+			return marketInstalled();
+			},
+			);
+			ipcMain.handle(
+			ipcChannels.dshMarketInstall,
+			async (_event, url: unknown): Promise<unknown> => {
+			if (typeof url !== "string" || !url) throw new Error("invalid market install payload");
+			if (!marketInstall) throw new Error("DSH market install is not available");
+			return marketInstall(url);
+			},
+			);
+			ipcMain.handle(
+			ipcChannels.dshMarketUninstall,
+			async (_event, name: unknown): Promise<unknown> => {
+			if (typeof name !== "string" || !name) throw new Error("invalid market uninstall payload");
+			if (!marketUninstall) throw new Error("DSH market uninstall is not available");
+			return marketUninstall(name);
+			},
+			);
+			ipcMain.handle(
+			ipcChannels.dshMarketStatus,
+			async (): Promise<unknown> => {
+			if (!marketStatus) throw new Error("DSH market is not available");
+			return marketStatus();
+			},
+			);
+			ipcMain.handle(
+			ipcChannels.sessionsCatalogCopy,
 		async (_event, sessionId: string) => {
 			const result = await copyCatalogSession(sessionId);
 			void appLogger.info("session", "Session copied", {
