@@ -68,7 +68,7 @@ export function updateSourceFeedUrl(source: UpdateSourceId, customHost?: string 
 
 /**
  * macOS manual 检查的镜像 latest-release 页 URL（镜像同样支持重定向跟随），
- * 例：`https://ghfast.top/https://github.com/ayuayue/PiStudio/releases/latest`；
+ * 例：`https://ghfast.top/https://github.com/razivhhf572/PiStudio/releases/latest`；
  * github 源返回 null → 主进程走官方 URL。
  */
 export function updateSourceLatestReleaseUrl(source: UpdateSourceId, customHost?: string | null): string | null {

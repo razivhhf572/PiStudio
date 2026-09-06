@@ -46,12 +46,12 @@ export const CATALOG_UPDATE_ALLOWED_BRANCHES = ["main", "dev"] as const;
 function sourceBaseUrls(branch: string): { catalog: string; manifest: string }[] {
 	return [
 		{
-			catalog: `https://cdn.jsdelivr.net/gh/ayuayue/PiStudio@${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
-			manifest: `https://cdn.jsdelivr.net/gh/ayuayue/PiStudio@${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
+			catalog: `https://cdn.jsdelivr.net/gh/razivhhf572/PiStudio@${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
+			manifest: `https://cdn.jsdelivr.net/gh/razivhhf572/PiStudio@${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
 		},
 		{
-			catalog: `https://raw.githubusercontent.com/ayuayue/PiStudio/${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
-			manifest: `https://raw.githubusercontent.com/ayuayue/PiStudio/${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
+			catalog: `https://raw.githubusercontent.com/razivhhf572/PiStudio/${branch}/resources/${PI_AI_CATALOG_FILE_NAME}`,
+			manifest: `https://raw.githubusercontent.com/razivhhf572/PiStudio/${branch}/resources/${PI_AI_CATALOG_MANIFEST_FILE_NAME}`,
 		},
 	];
 }

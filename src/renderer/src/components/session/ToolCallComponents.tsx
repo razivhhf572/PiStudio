@@ -6,6 +6,7 @@ import {
   ChevronRight,
   CircleCheck,
   CircleX,
+  ExternalLink,
   FileText,
   Folder,
   Globe2,
@@ -190,6 +191,8 @@ export const ToolCard = memo(function ToolCard(props: {
 	sessionId?: string;
 	/** 通过会话工作区路由打开工具目标文件（相对路径由 App 层补齐工作目录） */
 	onOpenFile?: (path: string) => void;
+	/** 在右侧 diff 查看器中打开本轮修改（path + 新旧内容；历史会话不依赖磁盘） */
+	onDiffFile?: DiffFileHandler;
 }) {
 	const [expanded, setExpanded] = useState(props.defaultOpen ?? false);
 	const messageStatus = getToolStatus(props.message);
@@ -425,21 +428,46 @@ export const ToolCard = memo(function ToolCard(props: {
 										maxHeight={200}
 										language="diff"
 									/>
-									{props.onOpenFile && (
+									{(props.onOpenFile || props.onDiffFile) && (
 										// 打开按钮与 diff 标题同行但不嵌套在 FileDiff 的折叠按钮内，
 										// 避免无效的 button 嵌套；路径解析交给会话工作区统一处理。
+										// "打开文件"与"diff 查看器"并列（对齐输入框上方修改清单的入口组合）：
+										// 前者看文件本体，后者在右侧抽屉看完整增删行（历史会话不依赖磁盘）。
 										<div className="flex h-9 shrink-0 items-center">
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon-xs"
-												className="size-6 rounded text-text-tertiary hover:bg-muted hover:text-foreground"
-												aria-label={t("tool.openFile")}
-												title={t("tool.openFile")}
-												onClick={() => props.onOpenFile?.(diffTarget.path)}
-											>
-												<FileText size={12} aria-hidden="true" />
-											</Button>
+											<div className="flex items-center gap-0.5">
+												{props.onOpenFile && (
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon-xs"
+														className="size-6 rounded text-text-tertiary hover:bg-muted hover:text-foreground"
+														aria-label={t("tool.openFile")}
+														title={t("tool.openFile")}
+														onClick={() => props.onOpenFile?.(diffTarget.path)}
+													>
+														<FileText size={12} aria-hidden="true" />
+													</Button>
+												)}
+												{props.onDiffFile && (
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon-xs"
+														className="size-6 rounded text-text-tertiary hover:bg-muted hover:text-foreground"
+														aria-label={t("tool.viewDiff")}
+														title={t("tool.viewDiff")}
+														onClick={() =>
+															props.onDiffFile?.(
+																diffTarget.path,
+																diffTarget.originalContent,
+																diffTarget.content,
+															)
+														}
+													>
+														<ExternalLink size={12} aria-hidden="true" />
+													</Button>
+												)}
+											</div>
 										</div>
 									)}
 								</div>
@@ -507,6 +535,8 @@ export const ToolGroupCard = memo(function ToolGroupCard(props: {
 	sessionId?: string;
 	/** 转交给每张工具卡的文件打开路由 */
 	onOpenFile?: (path: string) => void;
+	/** 转交给每张工具卡：右侧 diff 查看器打开入口 */
+	onDiffFile?: DiffFileHandler;
 }) {
 	return (
 		<section className="tool-group-card w-full min-w-0 overflow-hidden rounded-none border-0 bg-transparent" data-message-id={props.group.id}>
@@ -518,6 +548,7 @@ export const ToolGroupCard = memo(function ToolGroupCard(props: {
 						stopped={props.stopped}
 						sessionId={props.sessionId}
 						onOpenFile={props.onOpenFile}
+						onDiffFile={props.onDiffFile}
 					/>
 				))}
 			</div>

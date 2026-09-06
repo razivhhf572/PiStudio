@@ -16,7 +16,9 @@ import { LiveDuration } from "../LiveDuration";
 import { CopyMenu, stripMarkdown } from "../SurfaceComponents";
 import { buildTurnDisplay, hasFoldableContent } from "../timeline/buildTurnDisplay";
 import { resolveLiveInterimId } from "../timeline/liveMount";
+import { buildTurnUsageStats } from "../timeline/turnUsage";
 import { buildProcessSummary } from "../timeline/segmentSummary";
+import { formatTokens } from "../SessionContextMeter";
 import type {
 	AgentRunItem,
 	MessageItem,
@@ -124,6 +126,9 @@ export const TurnRow = memo(
 
 	const processSummary = useMemo(() => buildProcessSummary(displayItems), [displayItems]);
 	const showProcessToggle = hasFoldableContent(displayItems);
+	// 本轮 token 用量（输入/输出/速率）：取最后一条带 usage 的 assistant 消息，
+	// 数据来自 DSH 投影器 / pi 结算写入的消息 meta.usage（历史会话同样可读）。
+	const usageStats = useMemo(() => buildTurnUsageStats(run), [run]);
 
 	// 流式中最后一条中间回答 id（Live 挂载锚点）。
 	const lastInterimId = useMemo(() => {
@@ -352,6 +357,7 @@ export const TurnRow = memo(
 												stopped={props.agentRunning !== true}
 												sessionId={props.sessionId}
 												onOpenFile={props.onOpenFile}
+												onDiffFile={props.onDiffFile}
 											/>
 										);
 									}
@@ -480,20 +486,42 @@ export const TurnRow = memo(
 					</div>
 				)}
 
-				{/* 尾部耗时：回复生成中由 LiveDuration 实时计时（100ms 连续跳动，用户视线在底部），
+				{/* 尾部统计：耗时 + token 用量（Hermes 风格一行紧凑小字）。
+				    耗时：回复生成中由 LiveDuration 实时计时（100ms 连续跳动，用户视线在底部），
 				    回复结束后固定为总耗时。全轮只有一个耗时显示点（行头只留时间戳），
-				    避免开头结尾重复；无最终回答的轮（纯工具/思考）同样可见。 */}
-				{showDuration && (
-					<div className="flex items-center gap-1.5 text-muted-foreground">
-						<Clock size={12} className="shrink-0" aria-hidden="true" />
-						{/* 耗时数字与行头时间一致用界面字体（见 TurnAuthorHeader 注释）；tabular-nums 保持跳动不抖 */}
-						<span className="text-body leading-none tabular-nums">
-							{isRunLive ? (
-								<LiveDuration startedAt={run.startedAt} isStreaming />
-							) : (
-								formatDuration(duration)
-							)}
-						</span>
+				    避免开头结尾重复；无最终回答的轮（纯工具/思考）同样可见。
+				    token：本轮输入/输出用量与生成速率（meta.usage，历史会话同样可读）。 */}
+				{(showDuration || usageStats) && (
+					<div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-muted-foreground">
+						{showDuration && (
+							<>
+								<span className="flex items-center gap-1.5">
+									<Clock size={12} className="shrink-0" aria-hidden="true" />
+									{/* 耗时数字与行头时间一致用界面字体（见 TurnAuthorHeader 注释）；tabular-nums 保持跳动不抖 */}
+									<span className="text-body leading-none tabular-nums">
+										{isRunLive ? (
+											<LiveDuration startedAt={run.startedAt} isStreaming />
+										) : (
+											formatDuration(duration)
+										)}
+									</span>
+								</span>
+								{usageStats && <span aria-hidden>·</span>}
+							</>
+						)}
+						{usageStats && (
+							<span className="flex items-center gap-x-2 text-body leading-none tabular-nums">
+								{usageStats.inputTokens != null && (
+									<span>{t("turnUsage.inputTokens", { value: formatTokens(usageStats.inputTokens) })}</span>
+								)}
+								{usageStats.outputTokens != null && (
+									<span>{t("turnUsage.outputTokens", { value: formatTokens(usageStats.outputTokens) })}</span>
+								)}
+								{usageStats.tps != null && (
+									<span>{t("composerStats.tps", { throughput: String(Math.round(usageStats.tps)) })}</span>
+								)}
+							</span>
+						)}
 					</div>
 				)}
 

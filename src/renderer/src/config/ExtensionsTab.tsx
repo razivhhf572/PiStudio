@@ -52,7 +52,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiStudio",
+		repoUrl: "https://github.com/razivhhf572/PiStudio",
 	},
 	{
 		name: "pi-deck-plan-mode",
@@ -62,7 +62,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiStudio",
+		repoUrl: "https://github.com/razivhhf572/PiStudio",
 	},
 	{
 		name: "pi-deck-goal-mode",
@@ -72,7 +72,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiStudio",
+		repoUrl: "https://github.com/razivhhf572/PiStudio",
 	},
 	{
 		name: "pi-deck-ask-question",
@@ -82,7 +82,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiStudio",
+		repoUrl: "https://github.com/razivhhf572/PiStudio",
 	},
 	{
 		name: "pi-deck-nul-redirect-fix",
@@ -92,7 +92,7 @@ const RECOMMENDED_PACKAGES: RecommendedPackage[] = [
 		downloads: "",
 		updated: "",
 		npmUrl: "",
-		repoUrl: "https://github.com/ayuayue/PiStudio",
+		repoUrl: "https://github.com/razivhhf572/PiStudio",
 	},
 	{
 		name: "context-mode",

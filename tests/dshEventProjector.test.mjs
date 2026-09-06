@@ -568,6 +568,8 @@ test("assistant/message 携带 usage：投影进 projection.usage + 消息 meta.
 	assert.equal(p.messages[0].meta?.usage?.outputTokens, 45);
 	assert.equal(p.messages[0].meta?.usage?.cacheReadTokens, 300);
 	assert.equal(p.messages[0].meta?.usage?.cacheWriteTokens, 12);
+	// 无流式骨架（无计时起点）：tps 缺省，不写 meta
+	assert.equal(p.messages[0].meta?.usage?.tps, undefined);
 });
 
 test("assistant/message usage 更新流式骨架：保留已有 meta 并写入 usage", () => {
@@ -588,6 +590,36 @@ test("assistant/message usage 更新流式骨架：保留已有 meta 并写入 u
 	assert.equal(p.messages[0].meta?.usage?.inputTokens, 88);
 	assert.equal(p.messages[0].meta?.usage?.outputTokens, 7);
 	assert.equal(p.usage?.inputTokens, 88);
+	// tps = outputTokens ÷ 生成期（首 delta seq3 → 终态 seq5，2ms）
+	assert.equal(p.messages[0].meta?.usage?.tps, 7 / 0.002);
+	// 终态后计时起点清空（下一轮重新计时）
+	assert.equal(p.assistantFirstDeltaAt, undefined);
+});
+
+test("assistant/message tps 多轮共享投影器实例时按轮重新计时", () => {
+	// 第一轮：chunk(seq 3) → message(seq 5)，tps 按 2ms 结算
+	let p = projectDshEvent(undefined, event("assistant/chunk", 3, {
+		chunk: { type: "text-delta", index: 0, text: "a" },
+	}), AGENT);
+	p = projectDshEvent(p, event("assistant/message", 5, {
+		message: {
+			content: [{ type: "text", text: "回答一" }],
+			usage: { inputTokens: 50, outputTokens: 10 },
+		},
+	}), AGENT);
+	assert.equal(p.messages[0].meta?.usage?.tps, 10 / 0.002);
+	// 第二轮：计时起点必须重置（否则把两轮间隔算进生成期，tps 严重偏低）
+	p = projectDshEvent(p, event("assistant/chunk", 30, {
+		chunk: { type: "text-delta", index: 0, text: "b" },
+	}), AGENT);
+	p = projectDshEvent(p, event("assistant/message", 32, {
+		message: {
+			content: [{ type: "text", text: "回答二" }],
+			usage: { inputTokens: 60, outputTokens: 20 },
+		},
+	}), AGENT);
+	assert.equal(p.messages[1].id, "dsh:30");
+	assert.equal(p.messages[1].meta?.usage?.tps, 20 / 0.002);
 });
 
 test("assistant/message usage 缺失/全零：不写 meta.usage、不覆盖已有 projection.usage", () => {

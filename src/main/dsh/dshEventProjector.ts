@@ -40,8 +40,11 @@ export type DshProjection = {
 	/** DSH plan 模式是否生效（plan/mode 事件最后值；缺失 = 关闭）。 */
 	planModeActive: boolean;
 	/** 最近一次 assistant 回合的 token 用量（G16：assistant/message 携带 adapter 报告
-	 *  的 usage 时更新，latest wins；缺失 = 适配器未报告）。 */
-	usage?: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number };
+	 *  的 usage 时更新，latest wins；缺失 = 适配器未报告）。
+	 *  tps（生成速率）由投影器按「首 delta → 终态」墙钟结算，随消息 meta.usage 持久化。 */
+	usage?: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number; tps?: number };
+	/** 当前流式 assistant 消息的首个 delta 时刻（token 统计计时起点；终态后清空）。 */
+	assistantFirstDeltaAt?: number;
 	/** DSH 当轮真实系统提示（request/header 事件的 EpochHeader.system；last wins；
 	 *  缺失 = 会话尚未发过请求头）。dsh-web 轨迹同源——DSH 的系统提示由 harness 按
 	 *  persona + sections 在请求时组装，PiDeck 只能从请求头拿到文本。 */
@@ -251,12 +254,15 @@ export function projectDshEvent(
 			const chunk = (data.chunk ?? {}) as { type?: string; text?: unknown };
 			if (chunk.type === "text-delta" && typeof chunk.text === "string") {
 				next.pendingAssistantId ??= `dsh:${seq0}`;
+				// 首个 delta 作为 token 统计的生成起点（终态 assistant/message 结算 tps 用）
+				next.assistantFirstDeltaAt ??= eventTime(event.time);
 				next.pendingAssistantText = base.pendingAssistantText + chunk.text;
 				next.deltaText = chunk.text;
 				next.isStreaming = true;
 				next.stateChanged = true;
 			} else if (chunk.type === "reasoning-delta" && typeof chunk.text === "string") {
 				next.pendingAssistantId ??= `dsh:${seq0}`;
+				next.assistantFirstDeltaAt ??= eventTime(event.time);
 				next.pendingAssistantThinking = base.pendingAssistantThinking + chunk.text;
 				next.deltaReasoning = chunk.text;
 				next.isStreaming = true;
@@ -276,6 +282,7 @@ export function projectDshEvent(
 			if (texts.length === 0) break;
 			const joined = texts.join("");
 			next.pendingAssistantId ??= `dsh:${seq0}`;
+			next.assistantFirstDeltaAt ??= eventTime(event.time);
 			if (type === "text-chunks") {
 				next.pendingAssistantText = base.pendingAssistantText + joined;
 				next.deltaText = joined;
@@ -299,7 +306,8 @@ export function projectDshEvent(
 			// G16：usage 统计——adapter 报告 token 用量时 assistant/message 携带 usage，
 			// 投影进 projection（渲染层 runtime state 的 token/缓存指标），并写入本条
 			// assistant 消息的 meta.usage（轨迹账本按消息展示 token 用量，dsh-web 同源）。
-			const usageForMessage: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number } | undefined = (() => {
+			// tps 由投影器按「首 delta → 终态」墙钟结算（无流式骨架/无计时起点时缺省）。
+			const usageForMessage: { inputTokens: number; outputTokens: number; cacheReadTokens?: number; cacheWriteTokens?: number; tps?: number } | undefined = (() => {
 				if (!isRecord(data.message)) return undefined;
 				const usage = (data.message as { usage?: unknown }).usage;
 				if (!isRecord(usage)) return undefined;
@@ -307,11 +315,18 @@ export function projectDshEvent(
 				const inputTokens = typeof u.inputTokens === "number" ? u.inputTokens : 0;
 				const outputTokens = typeof u.outputTokens === "number" ? u.outputTokens : 0;
 				if (inputTokens > 0 || outputTokens > 0) {
+					const firstDeltaAt = base.assistantFirstDeltaAt;
+					const generationMs = firstDeltaAt != null ? eventTime(event.time) - firstDeltaAt : undefined;
+					const tps =
+						outputTokens > 0 && generationMs != null && generationMs > 0
+							? outputTokens / (generationMs / 1000)
+							: undefined;
 					const result = {
 						inputTokens,
 						outputTokens,
 						...(typeof u.cacheReadTokens === "number" ? { cacheReadTokens: u.cacheReadTokens } : {}),
 						...(typeof u.cacheWriteTokens === "number" ? { cacheWriteTokens: u.cacheWriteTokens } : {}),
+						...(tps != null ? { tps } : {}),
 					};
 					next.usage = result;
 					return result;
@@ -411,6 +426,8 @@ export function projectDshEvent(
 			next.pendingAssistantId = undefined;
 			next.pendingAssistantText = "";
 			next.pendingAssistantThinking = "";
+			// 终态已结算：清计时起点，下一轮 assistant 消息重新计时（多轮共享投影器实例）。
+			next.assistantFirstDeltaAt = undefined;
 			next.isStreaming = false;
 			next.stateChanged = true;
 			break;

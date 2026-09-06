@@ -720,6 +720,9 @@ export const zhCN = {
   "composerStats.tokens": "输入 {input} tok · 输出 {output} tok",
   "composerStats.ttft": "首 token {duration}",
   "composerStats.reply": "回复 {duration}",
+  // 每轮回答尾部 token 统计（Hermes 风格紧凑小字：↑输入 ↓输出 · 速率）
+  "turnUsage.inputTokens": "↑{value} tok",
+  "turnUsage.outputTokens": "↓{value} tok",
   // composer 上方 todo 常驻条（借鉴 dsh-web TodoPanel）：进度文案零计数省略，
   // 段间用 en-space 连接（HTML 折叠连续 ASCII 空格，需字面宽空格）
   "sessionTodo.title": "待办",

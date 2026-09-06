@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ToolGroupCard } from "../ToolCallComponents";
+import { ToolGroupCard, type DiffFileHandler } from "../ToolCallComponents";
 import type { ToolGroupItem } from "../timeline/types";
 
 /**
@@ -15,6 +15,8 @@ export const ToolStep = memo(function ToolStep(props: {
 	sessionId?: string;
 	/** 通过会话工作区打开 edit/write 的目标文件 */
 	onOpenFile?: (path: string) => void;
+	/** 右侧 diff 查看器入口（转交 ToolCard） */
+	onDiffFile?: DiffFileHandler;
 }) {
 	return (
 		<div style={{ display: props.hidden ? "none" : undefined }}>
@@ -23,6 +25,7 @@ export const ToolStep = memo(function ToolStep(props: {
 				stopped={props.stopped}
 				sessionId={props.sessionId}
 				onOpenFile={props.onOpenFile}
+				onDiffFile={props.onDiffFile}
 			/>
 		</div>
 	);

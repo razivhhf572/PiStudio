@@ -67,6 +67,13 @@ export function FileDiffViewer(props: {
 	originalContent?: string;
 	/** Session-recorded modified content, preferred over disk read for historical sessions. */
 	modifiedContent?: string;
+	/**
+	 * 会话记录 diff（工具卡/文件条入口）标记：传入的 originalContent/modifiedContent
+	 * 可能只是变动片段（edit/patch 的 oldText/newText）或空串（write/create 不存旧内容），
+	 * 此时优先用「磁盘当前 vs Git HEAD」全文件对比，读不到再回退传入内容。
+	 * Git 面板 diff 不传此标记：传入内容即完整对比基准（HEAD blob vs 工作区/暂存区）。
+	 */
+	preferFullFileDiff?: boolean;
 	/** 读取文件的 Git HEAD 原始内容，供差异模式左侧基准列使用。 */
 	readOriginalContent?: (path: string) => Promise<string>;
 	saveContent?: (
@@ -149,14 +156,43 @@ export function FileDiffViewer(props: {
 					setLoading(false);
 					return;
 				}
-				// 差异模式优先使用会话缓存原始内容（originalContent），
-				// 没有时降级到 Git HEAD；两者都无则左侧显示空（新增文件）。
-				// 修改后内容优先使用会话记录（modifiedContent），历史会话恢复时磁盘可能已变化。
-				const contentPromise = props.modifiedContent !== undefined
-					? Promise.resolve(props.modifiedContent)
-					: props.readContent(props.filePath, maxFileSize, props.fileAccessScope);
-				const originalPromise =
-					isDiffMode && props.originalContent !== undefined
+				// 会话记录 diff（preferFullFileDiff，工具卡/文件条入口）：传入内容可能只是
+				// 变动片段（edit/patch 的 oldText/newText）或空串（write/create 不存旧内容），
+				// 此时优先用「磁盘当前 vs Git HEAD」全文件对比——左侧出现删除行、右侧为全文件，
+				// 与 Git 面板体验一致；Git HEAD/磁盘读不到（非 git 仓库、历史会话文件已删）时
+				// 再回退到会话记录片段，保证「当年改动」仍可看。
+				// Git 面板 diff（非 preferFullFileDiff）：传入的 originalContent/modifiedContent
+				// 就是完整对比基准（HEAD blob vs 工作区/暂存区），直接使用，不做磁盘覆盖。
+				const contentPromise = props.preferFullFileDiff
+					? (async () => {
+							try {
+								const disk = await props.readContent(
+									props.filePath,
+									maxFileSize,
+									props.fileAccessScope,
+								);
+								if (disk) return disk;
+							} catch {
+								// 读盘失败（历史会话文件已删）：回退会话记录内容
+							}
+							return props.modifiedContent ?? "";
+						})()
+					: props.modifiedContent !== undefined
+						? Promise.resolve(props.modifiedContent)
+						: props.readContent(props.filePath, maxFileSize, props.fileAccessScope);
+				const originalPromise = props.preferFullFileDiff
+					? (async () => {
+							if (props.readOriginalContent) {
+								try {
+									const head = await props.readOriginalContent(props.filePath);
+									if (head) return head;
+								} catch {
+									// 非 git 仓库/文件未跟踪：回退会话记录旧内容
+								}
+							}
+							return props.originalContent ?? "";
+						})()
+					: isDiffMode && props.originalContent !== undefined
 						? Promise.resolve(props.originalContent)
 						: isDiffMode && props.readOriginalContent
 							? props.readOriginalContent(props.filePath).catch(() => "")
@@ -248,7 +284,7 @@ export function FileDiffViewer(props: {
 	// readContent/readOriginalContent 是稳定的 API 回调（上层已 useCallback），
 	// 不参与 effect deps，避免父组件因其他状态变化重渲染时反复加载文件导致编辑器重置到顶部。
 	// 两侧缓存内容都需要监听：同一路径可在多个历史提交 Diff tab 之间切换。
-	}, [props.filePath, props.activeTabId, props.originalContent, props.modifiedContent, props.fileAccessScope?.projectId, isDiffMode, maxFileSize]);
+	}, [props.filePath, props.activeTabId, props.originalContent, props.modifiedContent, props.preferFullFileDiff, props.fileAccessScope?.projectId, isDiffMode, maxFileSize]);
 
 	const handleClose = useCallback(() => {
 		props.onClose();
@@ -485,11 +521,13 @@ export function FileDiffViewer(props: {
 						<Button
 							variant="ghost"
 							size="icon-sm"
+							aria-pressed={sideBySide}
 							title={sideBySide ? t("app.showSingle") : t("app.showSplit")}
 							onClick={() => setSideBySide(!sideBySide)}
+							className={cn(sideBySide && "bg-muted text-foreground")}
 						>
 							{/* 图标随模式变化：分栏时显示「单栏」图标（点击合并），单栏时显示「分栏」图标（点击分栏），
-							   与 title 的目标状态一致，两种模式按钮一眼可辨 */}
+							   与 title 的目标状态一致，两种模式按钮一眼可辨；aria-pressed + 高亮表示当前分栏模式激活 */}
 							{sideBySide ? <Rows2 size={15} /> : <SquareSplitHorizontal size={15} />}
 						</Button>
 					)}

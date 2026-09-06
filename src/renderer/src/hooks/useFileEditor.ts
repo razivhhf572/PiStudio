@@ -28,6 +28,11 @@ interface EditorTab {
   mode: "view" | "diff";
   originalContent: string;
   modifiedContent?: string;
+  /**
+   * 会话记录 diff（工具卡/文件条入口）标记：传入的 originalContent/modifiedContent
+   * 可能只是变动片段或空串，diff 渲染时优先用「磁盘当前 vs Git HEAD」全文件对比。
+   */
+  preferFullFileDiff?: boolean;
   allowSave: boolean;
   tabKey?: string;
   label?: string;
@@ -316,6 +321,7 @@ export function useFileEditor(input: UseFileEditorInput): UseFileEditorOutput {
       openMode: EditorTabOpenMode = "permanent",
       initialLine?: number,
       fileAccessScope?: ProjectFileAccessScope,
+      preferFullFileDiff?: boolean,
     ) => {
       // updater 纯化：StrictMode 双调用下，updater 内 crypto.randomUUID/嵌套
       // setState 会产生两个不同 id → activeTabId 与 editorTabs 不一致 → 首次空白。
@@ -329,6 +335,7 @@ export function useFileEditor(input: UseFileEditorInput): UseFileEditorOutput {
         mode,
         originalContent: originalContent ?? "",
         modifiedContent,
+        preferFullFileDiff,
         allowSave,
         tabKey,
         label,
@@ -349,6 +356,7 @@ export function useFileEditor(input: UseFileEditorInput): UseFileEditorOutput {
               mode,
               originalContent: originalContent ?? "",
               modifiedContent,
+              preferFullFileDiff,
               allowSave,
               tabKey,
               label,
@@ -501,7 +509,9 @@ export function useFileEditor(input: UseFileEditorInput): UseFileEditorOutput {
       const mode = contentOpenModeRef.current;
       editorModeRef.current = mode;
       setEditorMode(mode);
-      // Diff 来自明确意图（消息/工具），按常驻打开，避免被下次单击预览挤掉
+      // Diff 来自明确意图（消息/工具），按常驻打开，避免被下次单击预览挤掉。
+      // preferFullFileDiff=true：会话记录内容可能只是变动片段/空串，
+      // 渲染时优先用「磁盘当前 vs Git HEAD」全文件对比（有删除行、有全文件上下文）。
       openEditorTab(
         path,
         "diff",
@@ -512,6 +522,9 @@ export function useFileEditor(input: UseFileEditorInput): UseFileEditorOutput {
         undefined,
         false,
         "permanent",
+        undefined,
+        undefined,
+        true,
       );
     },
     [modifiedFiles, dismissGitDiffOnly, openEditorTab],

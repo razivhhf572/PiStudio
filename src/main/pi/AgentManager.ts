@@ -46,6 +46,7 @@ import type { RpcResponse } from "./PiRpcClient";
 import { formatBashToolMessage } from "./bashResult";
 import type { MainProcessTranslationKey } from "../../shared/i18n/mainProcessCopy";
 import { mergeHistoryWithPreservedMessages, stabilizeReloadedMessageIds } from "./historyMessages";
+import { mergeUsageIntoLastAssistantMessage } from "./usageMeta";
 import {
 	buildAgentSessionKey,
 	toAbsoluteSessionPath,
@@ -4752,13 +4753,15 @@ export class AgentManager {
 		}
 
 		if (eventType === "message_end" || eventType === "done" || eventType === "error") {
-			// 结算性能指标（TTFT/总耗时/TPS）并边沿推送渲染层
-			this.settleMessagePerf(agentId, partialMessage);
 			// 先写入 History thinking 并 flush，再发 done 清 live。
 			this.finalizeThinkingIntoMessage(agentId, partialMessage);
 			this.upsertAssistantMessage(agentId, partialMessage);
 			// message_end/done/error 是本轮回答的最终状态，立即 flush 确保完整消息及时可见。
 			this.flushMessageEmit(agentId);
+			// 结算性能指标（TTFT/总耗时/TPS）并边沿推送渲染层；同时把 token 用量与速率
+			// 持久化到本轮 assistant 消息的 meta.usage（必须在 upsert 之后：写最后一条
+			// assistant 消息，历史会话回看也有统计）。
+			this.settleMessagePerf(agentId, partialMessage);
 			this.finishThinkingChannel(agentId);
 			this.activeAssistantMessageIds.delete(agentId);
 			this.streamingAgents.delete(agentId);
@@ -4859,6 +4862,26 @@ export class AgentManager {
 			agentId,
 			state: { ttftMs, totalMs, tps, perfAt: now },
 		});
+		// 持久化到本轮最后一条 assistant 消息的 meta.usage（与 DSH 投影器同构）：
+		// 消息随会话文件落盘，历史会话回看也能显示每轮 token 用量与生成速率。
+		// 注意：调用方保证 upsert 已完成（settle 前消息已在 messages 数组）。
+		const inputTokens = pickNumber(
+			usage?.input,
+			usage?.inputTokens,
+			usage?.prompt,
+			usage?.promptTokens,
+		);
+		const metaUsage: Record<string, number> = {};
+		if (inputTokens != null && inputTokens > 0) metaUsage.inputTokens = inputTokens;
+		if (outputTokens != null && outputTokens > 0) metaUsage.outputTokens = outputTokens;
+		if (tps != null) metaUsage.tps = tps;
+		if (Object.keys(metaUsage).length === 0) return;
+		const list = this.messages.get(agentId);
+		if (!list) return;
+		const index = mergeUsageIntoLastAssistantMessage(list, metaUsage);
+		if (index < 0) return;
+		this.markMessagesDirtyFrom(agentId, index);
+		this.flushMessageEmit(agentId);
 	}
 
 	/** 首 thinking_delta：铸造与 History 相同的稳定段 id（msg-thinking-${assistantMessageId}）。 */

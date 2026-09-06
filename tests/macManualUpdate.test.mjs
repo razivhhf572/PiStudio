@@ -37,7 +37,7 @@ const macManualUpdate = compileModule("src/main/update/macManualUpdate.ts", (spe
 	if (specifier === "electron") return { net: { fetch: async () => { throw new Error("not used in test"); } } };
 	if (specifier === "../utils/versionCompare") return versionCompare;
 	if (specifier === "./releaseRepo") {
-		return { RELEASES_URL: "https://github.com/ayuayue/PiDeck/releases" };
+		return { RELEASES_URL: "https://github.com/razivhhf572/PiStudio/releases" };
 	}
 	return null;
 });
@@ -50,14 +50,14 @@ const {
 
 test("parseGitHubReleaseVersion accepts a redirected latest-release tag only", () => {
 	assert.equal(
-		parseGitHubReleaseVersion("https://github.com/ayuayue/PiDeck/releases/tag/v0.7.4"),
+		parseGitHubReleaseVersion("https://github.com/razivhhf572/PiStudio/releases/tag/v0.7.4"),
 		"0.7.4",
 	);
 	assert.equal(
-		parseGitHubReleaseVersion("https://github.com/ayuayue/PiDeck/releases/tag/0.7.4-beta.1"),
+		parseGitHubReleaseVersion("https://github.com/razivhhf572/PiStudio/releases/tag/0.7.4-beta.1"),
 		"0.7.4-beta.1",
 	);
-	assert.equal(parseGitHubReleaseVersion("https://github.com/ayuayue/PiDeck/releases/latest"), null);
+	assert.equal(parseGitHubReleaseVersion("https://github.com/razivhhf572/PiStudio/releases/latest"), null);
 	assert.equal(parseGitHubReleaseVersion("not a URL"), null);
 });
 
@@ -69,7 +69,7 @@ test("manual macOS checker uses the static latest redirect and detects beta -> s
 			return {
 				ok: true,
 				status: 200,
-				url: "https://github.com/ayuayue/PiDeck/releases/tag/v0.7.4",
+				url: "https://github.com/razivhhf572/PiStudio/releases/tag/v0.7.4",
 			};
 		},
 	});
@@ -85,7 +85,7 @@ test("manual macOS checker does not flag the same stable version", async () => {
 		fetchLatestRelease: async () => ({
 			ok: true,
 			status: 200,
-			url: "https://github.com/ayuayue/PiDeck/releases/tag/v0.7.4",
+			url: "https://github.com/razivhhf572/PiStudio/releases/tag/v0.7.4",
 		}),
 	});
 
@@ -104,7 +104,7 @@ test("manual macOS checker surfaces HTTP and malformed redirect failures", async
 		fetchLatestRelease: async () => ({
 			ok: true,
 			status: 200,
-			url: "https://github.com/ayuayue/PiDeck/releases/latest",
+			url: "https://github.com/razivhhf572/PiStudio/releases/latest",
 		}),
 	});
 	await assert.rejects(() => malformed("0.7.3"), /did not resolve/);

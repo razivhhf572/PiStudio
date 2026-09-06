@@ -75,7 +75,7 @@ export function FeedbackDialog({ open, project, appInfo, onClose, onToast, onOpe
 	if (!open) return null;
 
 	const issueTitle = `${t("feedback.issueTitle")}${feedback.context.description.trim().split("\n")[0].slice(0, 60) || t("feedback.issueTitleEmpty")}`;
-	const githubUrl = `https://github.com/ayuayue/PiStudio/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(feedback.text)}`;
+	const githubUrl = `https://github.com/razivhhf572/PiStudio/issues/new?title=${encodeURIComponent(issueTitle)}&body=${encodeURIComponent(feedback.text)}`;
 
 	const handleCopy = async () => {
 		const ok = await feedback.copyText();
@@ -366,7 +366,7 @@ export function FeedbackDialog({ open, project, appInfo, onClose, onToast, onOpe
 									<Button
 										variant="secondary"
 										size="sm"
-										onClick={() => onOpenExternal?.("https://github.com/ayuayue/PiStudio")}
+										onClick={() => onOpenExternal?.("https://github.com/razivhhf572/PiStudio")}
 										disabled={!onOpenExternal}
 									>
 										{t("feedback.authorGithub")}

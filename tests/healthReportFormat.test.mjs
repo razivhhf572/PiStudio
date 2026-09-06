@@ -76,10 +76,10 @@ test("formatMarkdown includes description, checks, environment and logs", () => 
   const out = formatMarkdown(makeReport(), CONTEXT);
   assert.ok(out.includes("会话起不来"), "should include description");
   assert.ok(out.includes("1. 打开应用"), "should include repro steps");
-  assert.ok(out.includes("PiDeck 1.2.3"), "should include app version");
+  assert.ok(out.includes("PiStudio 1.2.3"), "should include app version");
   assert.ok(out.includes("disk.space"), "should include check id");
   assert.ok(out.includes("spawn failed"), "should include recent log");
-  assert.ok(out.startsWith("# PiDeck Diagnostic Report"), "should start with title");
+  assert.ok(out.startsWith("# PiStudio Diagnostic Report"), "should start with title");
 });
 
 test("formatMarkdown surfaces today's error/warn counts and collection totals", () => {
@@ -104,7 +104,7 @@ test("formatMarkdown notes truncation when collected logs exceed the display lim
 test("formatCard is compact and contains problem + environment", () => {
   const out = formatCard(makeReport(), CONTEXT);
   assert.ok(out.includes("会话起不来"), "should include problem");
-  assert.ok(out.includes("PiDeck 1.2.3"), "should include version");
+  assert.ok(out.includes("PiStudio 1.2.3"), "should include version");
   assert.ok(out.includes("errors") || out.includes("error"), "should mention errors");
 });
 
@@ -128,7 +128,7 @@ test("formatAiPrompt embeds project context when provided", () => {
   };
   const out = formatAiPrompt(makeReport(), CONTEXT, projectContext);
   assert.ok(out.includes("## 项目上下文（PiDeck）"), "should include project context section");
-  assert.ok(out.includes("项目地址（源码仓库）：https://github.com/ayuayue/PiDeck"), "should point at the GitHub repo (local source is usually absent)");
+  assert.ok(out.includes("项目地址（源码仓库）：https://github.com/razivhhf572/PiStudio"), "should point at the GitHub repo (local source is usually absent)");
   assert.ok(out.includes("- 禁止 any"), "should embed AGENTS.md content");
   assert.ok(out.includes("pideck-doctor"), "should list project skills");
   assert.ok(out.includes("/skill:pideck-doctor"), "should hint at the diagnostic skill");

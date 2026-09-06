@@ -69,27 +69,27 @@ test("updateSourceFeedUrl: github 源返回 null（走内置 app-update.yml 通�
 test("updateSourceFeedUrl: 预设镜像生成 generic feed baseUrl", () => {
 	assert.equal(
 		updateSourceFeedUrl("ghfast"),
-		"https://ghfast.top/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://ghfast.top/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 	assert.equal(
 		updateSourceFeedUrl("ghproxy-net"),
-		"https://ghproxy.net/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://ghproxy.net/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 	assert.equal(
 		updateSourceFeedUrl("ghproxy-cxkpro"),
-		"https://ghproxy.cxkpro.top/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://ghproxy.cxkpro.top/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 });
 
 test("updateSourceFeedUrl: custom 源用自定义前缀拼接", () => {
 	assert.equal(
 		updateSourceFeedUrl("custom", "https://mirror.example.com"),
-		"https://mirror.example.com/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://mirror.example.com/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 	// 自定义前缀尾斜杠由 normalize 去掉后再拼接
 	assert.equal(
 		updateSourceFeedUrl("custom", normalizeCustomMirrorHost("https://mirror.example.com/")),
-		"https://mirror.example.com/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://mirror.example.com/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 });
 
@@ -103,11 +103,11 @@ test("updateSourceFeedUrl: custom 源无合法前缀回退 null（走官方通�
 test("updateSourceLatestReleaseUrl: macOS manual 检查的镜像页 URL", () => {
 	assert.equal(
 		updateSourceLatestReleaseUrl("ghfast"),
-		"https://ghfast.top/https://github.com/ayuayue/PiDeck/releases/latest",
+		"https://ghfast.top/https://github.com/razivhhf572/PiStudio/releases/latest",
 	);
 	assert.equal(
 		updateSourceLatestReleaseUrl("custom", "https://mirror.example.com"),
-		"https://mirror.example.com/https://github.com/ayuayue/PiDeck/releases/latest",
+		"https://mirror.example.com/https://github.com/razivhhf572/PiStudio/releases/latest",
 	);
 	assert.equal(updateSourceLatestReleaseUrl("github"), null);
 });

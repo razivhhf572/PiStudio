@@ -7,6 +7,8 @@ type EditorTabLike = {
 	mode: "view" | "diff";
 	originalContent: string;
 	modifiedContent?: string;
+	/** 会话记录 diff（工具卡/文件条入口）：优先全文件对比（磁盘 vs Git HEAD）。 */
+	preferFullFileDiff?: boolean;
 	allowSave: boolean;
 	label?: string;
 	preserveDrawer?: boolean;
@@ -95,6 +97,11 @@ export function WorkbenchContent(props: WorkbenchContentProps) {
 			}
 			initialLine={props.activeTab.initialLine}
 			modifiedContent={props.activeTab.modifiedContent}
+			preferFullFileDiff={
+				props.activeTab.mode === "diff"
+					? props.activeTab.preferFullFileDiff
+					: undefined
+			}
 			onClose={props.onCloseEditor}
 			readContent={props.readContent}
 			readOriginalContent={props.readOriginalContent}

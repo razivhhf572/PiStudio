@@ -723,6 +723,9 @@ export const enUS: Record<TranslationKey, string> = {
   "composerStats.tokens": "Input {input} tok · Output {output} tok",
   "composerStats.ttft": "First token {duration}",
   "composerStats.reply": "Reply {duration}",
+  // Per-turn token stats under each answer (Hermes-style compact: ↑input ↓output · speed)
+  "turnUsage.inputTokens": "↑{value} tok",
+  "turnUsage.outputTokens": "↓{value} tok",
   // Composer-side todo strip (ported from dsh-web TodoPanel): zero-count segments
   // are omitted; segments joined with en-space (HTML collapses runs of ASCII spaces)
   "sessionTodo.title": "Todo",

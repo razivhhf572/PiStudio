@@ -455,7 +455,7 @@ test("switching update source rebuilds the generic feed URL immediately", async 
 	service.applyUpdateSource();
 	assert.equal(
 		updater.feedUrl,
-		"https://ghfast.top/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://ghfast.top/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 
 	// 回到官方源：重置 feed，恢复原生 GitHub provider
@@ -473,7 +473,7 @@ test("custom mirror prefix is normalized and applied as feed URL", async (t) => 
 	// 前缀 trim + 去尾斜杠后拼接到 generic feed
 	assert.equal(
 		updater.feedUrl,
-		"https://mirror.example.com/https://github.com/ayuayue/PiDeck/releases/latest/download",
+		"https://mirror.example.com/https://github.com/razivhhf572/PiStudio/releases/latest/download",
 	);
 });
 
@@ -487,5 +487,5 @@ test("manual delivery uses latestReleaseUrl from the configured mirror per check
 	await settings.update({ updateSource: "ghfast" });
 	await service.checkNow();
 	// macOS manual 检查：镜像源 URL 传进检查器（GitHub 源时为 undefined）
-	assert.equal(receivedUrl, "https://ghfast.top/https://github.com/ayuayue/PiDeck/releases/latest");
+	assert.equal(receivedUrl, "https://ghfast.top/https://github.com/razivhhf572/PiStudio/releases/latest");
 });
