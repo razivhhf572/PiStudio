@@ -1,3 +1,15 @@
+## v0.7.6-beta - 2026-09-06
+
+### 🚀 New Features
+- **DSH plugin market** — Install community plugins from the curated awesome-dsh-plugin registry right inside DSH settings (pnpm-powered, hot-reloaded, with live progress); an Installed tab shows what you have with activation state, uninstall, and a "no settings UI" marker for plugins without a config schema.
+- **DSH MCP server management** — A dedicated MCP tab (backed by a compatibility layer that lets dsh-mcp-manager-style plugins run on the headless host) lists / adds / toggles / removes / probes MCP servers; installed plugins now survive host restarts (profile bundle restore).
+- **DSH skill management** — Create, edit and delete user skills under ~/.dsh/skills with a Markdown editor; changes apply instantly and are invokable via /skill-name in the composer.
+- **Silent plugin installs on Windows** — The market no longer pops a console window while installing (windowsHide patch, persisted through a postinstall script).
+
+### 🐛 Fixes
+- **Market install timeouts** — Install/uninstall writes now allow up to 10 minutes, so long pnpm builds no longer trip the 30s bridge timeout.
+- **Installed plugin state on restart** — Plugins installed via the market are re-loaded when the host restarts (bundle restore), instead of silently dropping off.
+
 ## v0.7.4-beta - 2026-09-04
 
 ### 🚀 New Features
