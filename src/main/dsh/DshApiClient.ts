@@ -108,7 +108,7 @@ export class DshApiClient {
 	/** 桥接原始 fetch（插件管理桥等非 ApiProxy 路径用）：任意 dsh.internal URL。 */
 	rawFetch(
 		input: URL | string,
-		init?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal },
+		init?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal; timeoutMs?: number },
 	): Promise<Response> {
 		const url = input instanceof URL ? input : new URL(input, "http://dsh.internal");
 		return this.bridgedFetch(url, init);
@@ -117,7 +117,7 @@ export class DshApiClient {
 	/** 真正的桥接 fetch：发 fetch-request，等 unary 响应或组装流式响应。 */
 	private bridgedFetch(
 		input: URL,
-		init?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal },
+		init?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal; timeoutMs?: number },
 	): Promise<Response> {		// host 已 dispose：不再向桥发消息（transport.send 已静默丢弃，这里直接拒绝
 		// 更快暴露问题，且不产生悬挂的 pending）。
 		if (this.disposed) {
@@ -134,14 +134,16 @@ export class DshApiClient {
 			// E2：请求超时——transport 死亡（host 崩溃且重启超限放弃）后，host 侧不会有
 			// 任何响应帧，悬挂 pending 会让 IPC 永久挂起。流式请求在 fetch-stream-start
 			// 到达后由 abort/fetch-end 管理，不再受此超时限制（mux 是长连接）。
+			// timeoutMs 可被调用方按请求覆盖（如 dshmarket 安装/卸载是分钟级长操作）。
+			const timeoutMs = init?.timeoutMs ?? this.timeoutMs;
 			const timer = setTimeout(() => {
 				const pending = this.pending.get(id);
 				if (!pending) return;
 				if (pending.stream) return;
 				this.pending.delete(id);
-				this.log(`fetch timed out after ${this.timeoutMs}ms`, { id });
-				reject(new Error(`DSH bridge fetch timed out after ${this.timeoutMs}ms`));
-			}, this.timeoutMs);
+				this.log(`fetch timed out after ${timeoutMs}ms`, { id });
+				reject(new Error(`DSH bridge fetch timed out after ${timeoutMs}ms`));
+			}, timeoutMs);
 			timer.unref();
 			const pending: PendingFetch = { resolve, reject, timer };
 			this.pending.set(id, pending);

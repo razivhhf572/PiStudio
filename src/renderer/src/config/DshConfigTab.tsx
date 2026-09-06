@@ -35,6 +35,7 @@ import { DshRuntimeSection } from "./DshRuntimeSection";
 import { dshRuntimeStatusAtom } from "../atoms/dsh-atoms";
 import { isDshPluginNamespace, dshPluginNamespaceTitleKey, dshPluginNamespaceDescriptionKey } from "./dshPluginNamespaces";
 import { DshPluginSection, PluginInventoryView } from "./DshPluginSection";
+import { PluginMarketView } from "./DshPluginMarket";
 import { DeepseekRouteCard, PiAiProvidersCard } from "./DshProviderCards";
 import { collectCredentialRefsWithValue, normalizeDshSchema, type DshSectionApi } from "./dshSchema";
 import { presetDisplayDescription, presetDisplayName } from "./dshPresetDisplay";
@@ -144,8 +145,8 @@ export const DshConfigTab = forwardRef<DshConfigTabHandle, {
 	const dshRuntimeStatus = useAtomValue(dshRuntimeStatusAtom);
 	const runtimeInstalled = dshRuntimeStatus.state === "installed";
 	const [activeTab, setActiveTab] = useState(loadDshLastTab);
-	/** 插件 tab 内部子页（对齐 dsh-web：插件配置 / 插件列表）。 */
-	const [pluginPane, setPluginPane] = useState<"config" | "list">(loadDshLastPluginPane);
+	/** 插件 tab 内部子页（对齐 dsh-web：插件配置 / 插件列表 / 插件市场）。 */
+	const [pluginPane, setPluginPane] = useState<"config" | "list" | "market">(loadDshLastPluginPane);
 
 	/** 切换导航子页并持久化：退出配置弹窗/重启应用后再进入，回到上次选定的界面。 */
 	const selectTab = useCallback((id: string) => {
@@ -158,7 +159,7 @@ export const DshConfigTab = forwardRef<DshConfigTabHandle, {
 	}, []);
 
 	/** 切换插件子页并持久化（与 selectTab 同款记忆）。 */
-	const selectPluginPane = useCallback((pane: "config" | "list") => {
+	const selectPluginPane = useCallback((pane: "config" | "list" | "market") => {
 		setPluginPane(pane);
 		try {
 			localStorage.setItem(DSH_LAST_PLUGIN_PANE_KEY, pane);
@@ -525,6 +526,7 @@ export const DshConfigTab = forwardRef<DshConfigTabHandle, {
 										[
 											{ id: "config", labelKey: "config.dsh.tab.pluginConfig" },
 											{ id: "list", labelKey: "config.dsh.tab.pluginList" },
+											{ id: "market", labelKey: "config.dsh.tab.pluginMarket" },
 										] as const
 									).map((pane) => (
 										<button
@@ -562,6 +564,10 @@ export const DshConfigTab = forwardRef<DshConfigTabHandle, {
 								</div>
 								<div hidden={pluginPane !== "list"}>
 									<PluginInventoryView />
+								</div>
+								{/* 方案 A：插件市场（dshmarket curated registry，安装/卸载/进度） */}
+								<div hidden={pluginPane !== "market"}>
+									<PluginMarketView />
 								</div>
 							</div>
 						</div>

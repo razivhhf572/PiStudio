@@ -90,9 +90,9 @@ async function main(): Promise<void> {
 	// 2) installHiddenConsolePatch：隐藏控制台分配失败时退回 windowsHide 注入兜底；
 	//    并对沙箱 runner 的 spawn 注入 NODE_OPTIONS preload（runner 是 GUI 进程、
 	//    不继承 host 控制台，需在 runner 进程内自建隐藏控制台——见 runnerConsolePreload.ts）。
-	installHostHiddenConsole();
+	const hiddenConsoleOk = installHostHiddenConsole();
 	installHiddenConsolePatch();
-
+	console.log(`[dsh-host-entry] hidden console: ${hiddenConsoleOk ? "allocated" : "FAILED (fallback windowsHide)"}`);
 	// ── 组合：base 补丁 + 覆盖层（ApiProxy/workspace/storage + picker stub + 遥测关）──
 	// require base 用宿主 node_modules 目录（DshHost 传 --dsh-node-modules 的 file URL）：
 	// 打包后是 app.asar/node_modules（Electron asar patch 生效）；不能用 DSH_HOME（数据目录无包）。

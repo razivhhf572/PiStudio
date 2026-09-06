@@ -77,7 +77,7 @@
     "docs:dev": "vitepress dev docs-site",
     "docs:build": "vitepress build docs-site",
     "docs:preview": "vitepress preview docs-site",
-    "postinstall": "node scripts/fix-pty-permissions.js",
+    "postinstall": "node scripts/fix-pty-permissions.js && node scripts/patch-dshmarket.mjs",
     "typecheck": "tsc --noEmit",
     "make-icon": "node scripts/make-icon.js",
     "compile-exe": "node scripts/compile-exe.js",

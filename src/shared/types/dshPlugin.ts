@@ -87,12 +87,22 @@ export type DshSkillView = {
  * 这里只定义 renderer 用得到的窄视图（宽松字段，未知字段不拦截）。
  */
 
-/** 市场目录条目（curated registry 快照：awesome-dsh-plugin 精选来源）。 */
+/** 市场目录条目（curated registry 快照：awesome-dsh-plugin 精选来源）。
+ *  description 为 { en, zh } 双语对象（渲染层按当前语言取值）。 */
 export type DshMarketPluginEntry = {
 	name: string;
 	url: string;
-	description?: string;
-	categories?: string[];
+	owner?: string;
+	/** 分类 id（如 "agi" / "ui"）。 */
+	category?: string;
+	description?: string | { en?: string; zh?: string };
+	/** npm 包名（无则 null/缺省——GitHub 源插件）。 */
+	npm?: string | null;
+	version?: string | null;
+	stars?: number;
+	downloads?: number | null;
+	install?: string;
+	added?: string;
 };
 
 /** 市场目录响应（GET /dsh-market/registry → { registry }）。 */
@@ -106,11 +116,17 @@ export type DshMarketCatalog = {
 	};
 };
 
-/** 已装插件响应（GET /dsh-market/installed → { profile, installed, ... }）。 */
+/** 已装插件响应（GET /dsh-market/installed → { profile, installed, ... }）。
+ *  注意：installed 的 key 是 npm 全名（@scope/name），registry 条目的 name 是
+ *  短名（dsh-mcp-toggle）——渲染层匹配要兼容 `@scope/name`。 */
 export type DshMarketInstalled = {
 	profile: string;
-	/** name → spec（package.json dependencies 形状）。 */
+	/** name → spec（package.json dependencies 形状；key 为 npm 全名）。 */
 	installed: Record<string, string>;
+	/** 已落盘安装的 npm 全名列表。 */
+	present?: string[];
+	/** 激活状态（key 为 npm 全名；state: live/disabled 等）。 */
+	activation?: Record<string, { state?: string; bundle?: boolean; hot?: boolean }>;
 	/** 当前 live（已激活）的插件名。 */
 	live: string[];
 	disabled: string[];
@@ -131,6 +147,8 @@ export type DshMarketStatus = {
 	target: string;
 	seconds: number;
 	phase: string | null;
+	/** pnpm/安装器最后一行输出（进度展示用）。 */
+	lastLine?: string;
 	done: number;
 	total: number | null;
 	error: string | null;

@@ -508,14 +508,18 @@ export class DshHost {
 	 * dshmarket 市场调用（方案 A）：经 fetch 桥打 /dsh-market/* 路由。
 	 * hostEntry 的 handler 把 /dsh-market/ 前缀转发给 webServer stub 的 dispatch
 	 * （同源 host/origin 头由 stub 补齐）。HTTP >= 400 时抛 error 文本。
+	 * 安装/卸载是分钟级长操作（pnpm 下载 + 构建），默认桥超时 30s 不够——
+	 * 写操作显式给 10 分钟；GET 走默认超时。
 	 */
 	async marketFetch(path: string, init?: { method?: string; body?: unknown }): Promise<unknown> {
 		await this.ensureStarted();
 		if (!this.apiClient) throw new Error("DSH host is not started");
+		const isMutation = (init?.method ?? "GET").toUpperCase() !== "GET";
 		const response = await this.apiClient.rawFetch(path, {
 			method: init?.method ?? "GET",
 			headers: { "content-type": "application/json" },
 			...(init?.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
+			...(isMutation ? { timeoutMs: 10 * 60 * 1000 } : {}),
 		});
 		const text = await response.text();
 		let parsed: unknown;
@@ -803,6 +807,7 @@ export class DshHost {
 		mkdirSync(marketBinDir, { recursive: true });
 		writeDshCliShim(marketBinDir, process.execPath, join(appRoot, "@deepseek-ai", "dsh", "lib", "bin.js"));
 		forkEnv.PATH = `${marketBinDir}${delimiter}${forkEnv.PATH ?? ""}`;
+		this.log("dsh-host", "market bin PATH prefix injected", { binDir: marketBinDir, path: forkEnv.PATH });
 		const proxyPatch = this.resolveHostProxyEnvPatch();
 		if (proxyPatch) applyProxyEnvPatch(forkEnv, proxyPatch);
 
