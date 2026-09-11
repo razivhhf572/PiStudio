@@ -3782,7 +3782,7 @@ export function App() {
               active: drawer === "git",
               onClick: () => handleToolDrawerAction("git"),
             }] : []),
-            // 轨迹固定在内置浏览器前面：有 Git 时是第 3 个（files / git / trajectory / browser）。
+            // 轨迹固定在内置浏览器前面：有 Git 时是 files / git / trajectory / rewind? / browser / terminal。
             {
               id: "trajectory",
               label: t("session.view.trajectory"),
@@ -3807,6 +3807,20 @@ export function App() {
               active: drawer === "browser",
               onClick: () => handleToolDrawerAction("browser"),
             },
+            // 终端不是抽屉面板：点图标只开关主界面下方已有 Dock，不切右侧内容。
+            // 与 Tab 栏入口同一套 owner/target 门控，避免无 cwd 时开出空终端。
+            ...(!isLanWeb && terminalTarget
+              ? [{
+                  id: "terminal" as const,
+                  label: t("app.terminal"),
+                  icon: <Terminal size={16} />,
+                  active: terminalOpen,
+                  toggle: true,
+                  onClick: () => {
+                    setTerminalOpenForOwner(!terminalOpen);
+                  },
+                }]
+              : []),
           ]}
         />
       }

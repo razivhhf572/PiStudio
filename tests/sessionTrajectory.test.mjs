@@ -167,10 +167,12 @@ test("trajectory lives in the right drawer, not the session surface", () => {
 	assert.doesNotMatch(header, /session.view.trajectory/);
 	assert.match(hook, /"trajectory"/);
 	assert.match(app, /id: "trajectory"/);
-	const rail = app.slice(app.indexOf("WorkspaceDrawerRail"));
+	const rail = app.slice(app.indexOf("<WorkspaceDrawerRail"));
 	const trajectoryAt = rail.indexOf('id: "trajectory"');
 	const browserAt = rail.indexOf('id: "browser"');
+	const terminalAt = rail.indexOf('id: "terminal"');
 	assert.ok(trajectoryAt >= 0 && browserAt > trajectoryAt, "trajectory tab must sit before the built-in browser");
+	assert.ok(terminalAt > browserAt, "terminal toggle must sit after the built-in browser");
 	assert.match(drawer, /SessionTrajectoryPanel/);
 	assert.match(drawer, /drawer === "trajectory"/);
 });

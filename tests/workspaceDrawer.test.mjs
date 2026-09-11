@@ -137,9 +137,12 @@ test("drawer host renders an injected activity rail while open", () => {
   const app = readFileSync("src/renderer/src/App.tsx", "utf8");
   const shell = readFileSync("src/renderer/src/components/app/AppShell.tsx", "utf8");
   // rail 组件：水平 tablist + 激活态（pure official：shadcn Button + 下缘指示条）
+  // 独立开关（终端）走 button / aria-pressed，不塞进抽屉面板 tab 互斥。
   assert.match(rail, /role="tablist"/);
   assert.match(rail, /aria-orientation="horizontal"/);
-  assert.match(rail, /aria-selected=\{action\.active\}/);
+  assert.match(rail, /aria-selected=\{role === "tab" \? action\.active : undefined\}/);
+  assert.match(rail, /aria-pressed=\{role === "button" \? action\.active : undefined\}/);
+  assert.match(rail, /action\.toggle/);
   assert.match(rail, /from "\.\.\/ui-shadcn\/button"/);
   assert.match(rail, /variant=\{action\.active \? "secondary" : "ghost"\}/);
   // host：打开期间渲染注入的 rail

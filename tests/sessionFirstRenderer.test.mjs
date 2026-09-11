@@ -102,10 +102,12 @@ test("the dev workspace toolbar persists for inactive agents and the empty state
   assert.match(appSource, /id: "terminal"/);
   assert.match(appSource, /toolActions=\{sessionToolActions\}/);
   // files/git/browser 由右侧抽屉活动栏统一承载；Git 仍受设置与项目上下文门控。
+  // 终端跟在内置浏览器右侧，复用底部 Dock，不进抽屉面板。
   assert.match(
     appSource,
-    /<WorkspaceDrawerRail[\s\S]*?id: "files"[\s\S]*?id: "git"[\s\S]*?id: "browser"/,
+    /<WorkspaceDrawerRail[\s\S]*?id: "files"[\s\S]*?id: "git"[\s\S]*?id: "browser"[\s\S]*?id: "terminal"/,
   );
+  assert.match(appSource, /toggle: true,[\s\S]*?setTerminalOpenForOwner\(!terminalOpen\)/);
 });
 
 
